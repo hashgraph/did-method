@@ -15,7 +15,7 @@ This document was published as an Editor's Draft.
 Publication as an Editor's Draft does not imply endorsement by the W3C Membership. This is a draft document and may be updated, replaced or obsoleted by other documents at any time. It is inappropriate to cite this document as other than a work in progress.
 
 ## Motivation
-The general objective is to bind the Decentralized Identifier architecture to Hedera Hashgraph leveraging the native functionality of Hedera Consensus Service for appropriate mechanisms of DID documents and Hedera File Service to manage networks of trust defined by custom appnets implementations.
+The general objective is to bind the Decentralized Identifier architecture to Hedera Hashgraph leveraging the native functionality of Hedera Consensus Service for appropriate mechanisms of DID documents and Hedera File Service to manage networks of trust defined by custom appnet implementations.
 
 ## Hedera Hashgraph DID Method
 The namestring that shall identify this DID method is: `hedera`
@@ -27,8 +27,8 @@ The `did:hedera` namestring is defined by the following ABNF:
 ```abnf
 hedera-did = "did:hedera:" hedera-specific-idstring ";" hedera-specific-parameters
 hedera-specific-idstring = hedera-network ":" hedera-base58-key
-hedera-specific-parameters = appnet-address-book-parameter [";" appnet-did-topic]
-appnet-address-book-parameter = "hedera:" hedera-network ":fid=" appnet-address-book-file-id
+hedera-specific-parameters = appnet-address-book [";" appnet-did-topic]
+appnet-address-book = "hedera:" hedera-network ":fid=" appnet-address-book-file-id
 
 appnet-did-topic = "hedera:" hedera-network ":tid=" appnet-did-topic-id
 appnet-address-book-file-id = *1DIGIT "." *1DIGIT "." *1DIGIT
@@ -74,10 +74,10 @@ Example address book file content:
 	"didTopicId": "0.0.1",
 	"vcTopicId": "0.0.2",
 	"appnetDIDServers": [
-        "https://example.com/myappnet/did", 
-        "https://example2.com/myappnet/did", 
-        "https://example3.com/myappnet/did"
-  ]
+		"https://example.com/myappnet/did", 
+		"https://example2.com/myappnet/did", 
+		"https://example3.com/myappnet/did"
+	]
 }
 ```
 
