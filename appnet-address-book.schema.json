@@ -1,0 +1,48 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"title": "Appnet address book",
+	"description": "Address Book of Hedera DID appnet",
+	"type": "object",
+	"required": [
+		"appnetName",
+		"didTopicId",
+		"vcTopicId",
+		"appnetDIDServers"
+	],
+	"properties": {
+		"appnetName": {
+			"$id": "#root/appnetName",
+			"title": "Name of the appnet",
+			"type": "string",
+			"default": "",
+			"pattern": "^.*$"
+		},
+		"didTopicId": {
+			"$id": "#root/didTopicId",
+			"title": "Hedera Consensus Service Topic ID for DID documents",
+			"type": "string",
+			"default": "",
+			"pattern": "[0-9]+\\.[0-9]+\\.[0-9]+"
+		},
+		"vcTopicId": {
+			"$id": "#root/vcTopicId",
+			"title": "Hedera Consensus Service Topic ID for verifiable credentials",
+			"type": "string",
+			"default": "",
+			"pattern": "[0-9]+\\.[0-9]+\\.[0-9]+"
+		},
+		"appnetDIDServers": {
+			"$id": "#root/appnetDIDServers",
+			"title": "List of appnet's DID servers",
+			"type": "array",
+			"default": [],
+			"items": {
+				"$id": "#root/appnetDIDServers/items",
+				"title": "Items",
+				"type": "string",
+				"default": "",
+				"pattern": "^.*$"
+			}
+		}
+	}
+}
