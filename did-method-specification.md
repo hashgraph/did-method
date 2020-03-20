@@ -31,11 +31,11 @@ hedera-specific-parameters = appnet-address-book [";" appnet-did-topic]
 appnet-address-book = "hedera:" hedera-network ":fid=" appnet-address-book-file-id
 
 appnet-did-topic = "hedera:" hedera-network ":tid=" appnet-did-topic-id
-appnet-address-book-file-id = *1DIGIT "." *1DIGIT "." *1DIGIT
-appnet-did-topic-id = *1DIGIT "." *1DIGIT "." *1DIGIT
+appnet-address-book-file-id = 1*DIGIT "." 1*DIGIT "." 1*DIGIT
+appnet-did-topic-id = 1*DIGIT "." 1*DIGIT "." 1*DIGIT
 
 hedera-network = "mainnet" / "testnet"
-hedera-base58-key = 44*(base58)
+hedera-base58-key = 32*44(base58)
 base58 = "1" / "2" / "3" / "4" / "5" / "6" / "7" / "8" / "9" / "A" / "B" /
          "C" / "D" / "E" / "F" / "G" / "H" / "J" / "K" / "L" / "M" / "N" /
          "P" / "Q" / "R" / "S" / "T" / "U" / "V" / "W" / "X" / "Y" / "Z" /
@@ -58,8 +58,8 @@ The `hedera-base58-key` identifier is a base58-encoded SHA-256 hash of this publ
 
 #### Method-Specific DID URL Parameters
 There are two method-specific parameters defined in Hedera DID:
-- fid - a mandatory parameter that defines an ID of an appent's address book file. 
-- tid - an optional parameter that defines an ID of Hedera Consensus Service topic to which DID document was posted. Tis can be used in case of open and publicly available DID documents.
+- `fid` - a mandatory parameter that defines an ID of an appent's address book file. 
+- `tid` - an optional parameter that defines an ID of Hedera Consensus Service topic to which DID document was posted. This can be used in case of open and publicly available DID documents to resolve DIDs without the use of appnet services.
 
 Hedera FileID is a triplet of numbers, e.g. `1.5.34634` represents file number `34634` within realm `5` within shard `1`.
 Hedera TopicID follows a similar format and is defined as a triplet of numbers, e.g. `0.0.21243` represents a topic identifier `21243` within realm `0` within shard `0`.
