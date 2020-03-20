@@ -1,5 +1,26 @@
 # Hedera Hashgraph DID Method Specification
 Version 0.1, Swisscom Blockchain AG
+ 
+## Table of contents
+- [Hedera Hashgraph DID Method Specification](#hedera-hashgraph-did-method-specification)
+  - [Table of contents](#table-of-contents)
+  - [About](#about)
+  - [Abstract](#abstract)
+  - [Status of This Document](#status-of-this-document)
+  - [Motivation](#motivation)
+  - [Hedera Hashgraph DID Method](#hedera-hashgraph-did-method)
+    - [Namespace Specific Identifier (NSI)](#namespace-specific-identifier-nsi)
+      - [Method-Specific DID URL Parameters](#method-specific-did-url-parameters)
+        - [Appnet address book](#appnet-address-book)
+  - [CRUD Operations](#crud-operations)
+    - [Create](#create)
+    - [Read](#read)
+    - [Update](#update)
+    - [Delete (Revoke)](#delete-revoke)
+  - [Security Considerations](#security-considerations)
+  - [Privacy Considerations](#privacy-considerations)
+  - [Reference Implementations](#reference-implementations)
+  - [References](#references)
 
 ## About
 This [DID method specification](https://w3c-ccg.github.io/did-spec/#specific-did-method-schemes) conforms to the requirements in the DID specification currently published by the W3C Credentials Community Group. For more information about DIDs and DID method specifications, please see the [DID Primer](https://github.com/WebOfTrustInfo/rwot5-boston/blob/master/topics-and-advance-readings/did-primer.md) and [DID Spec](https://w3c.github.io/did-core/).
