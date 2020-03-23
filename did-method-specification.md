@@ -17,6 +17,11 @@ Version 0.1, Swisscom Blockchain AG
     - [Read](#read)
     - [Update](#update)
     - [Delete (Revoke)](#delete-revoke)
+    - [Appnet Relay Interface for CRUD Operations](#appnet-relay-interface-for-crud-operations)
+      - [Create](#create-1)
+      - [Read](#read-1)
+      - [Update](#update-1)
+      - [Delete (Revoke)](#delete-revoke-1)
   - [Security Considerations](#security-considerations)
   - [Privacy Considerations](#privacy-considerations)
   - [Reference Implementations](#reference-implementations)
@@ -136,8 +141,7 @@ Hedera nodes support a Consensus Service API by which clients submit transaction
   - or an encrypted representation of this Base64 string, where the encryption and decryption methods and keys are defined by appnet owners.
 - `signature` - A signature that is a result of signing a string that represents Base64-encoded plain DID document with a private key corresponding to the public key `#did-root-key` in the DID document.
 
-There is no on-chain mechanism that would validate incoming messages content, so it is a responsibility of the appnet's subscription logic to recognize and validate them based on the above criteria.
-
+There is no on-chain mechanism that would validate incoming messages content, so appnet's subscription logic must recognize and validate them based on the above criteria.
 
 Here is an example message content:
 ```json
@@ -151,18 +155,10 @@ Here is an example message content:
 
 It is a responsibility of the appnet owners to decide who can submit messages to their DID topic. Access control of message submission is defined by a `submitKey` property of `ConsensusCreateTopicTransaction` body. Detailed information on Hedera Consensus Service APIs can be found in the official [Hedera API documentation](https://docs.hedera.com/hedera-api/consensus/consensusservice).
 
-
 ### Create
 A DID document is created within the appnet by sending a `ConsensusSubmitMessage` transaction to Hedera node. It is executed by sending a `submitMessage` RPC call to HCS with the `ConsensusSubmitMessageTransactionBody` containing:
 - `topicID` - equal to the ID of appnet's DID topic
 - `message` - a JSON DID message described above with `didOperation` set to `createOrUpdate`
-
-DID Subjects, who have their own accounts on Hedera network and are authorized to submit messages to appnet's DID topic can send this transaction directly.
-Other DID Subjects shall use appnet's defined relay interface.
-
-```
-TODO: Specify appnet's relay interface (REST API)?
-```
 
 ### Read
 A Hedera DID can be resolved by anyone on the network providing that DID documents were submitted to the appnet topic in a plain form.
@@ -179,18 +175,140 @@ A DID document is updated within the appnet by sending a `ConsensusSubmitMessage
 - `topicID` - equal to the ID of appnet's DID topic
 - `message` - a JSON DID message described above with `didOperation` set to `createOrUpdate`
 
-DID Subjects, who have their own accounts on Hedera network and are authorized to submit messages to appnet's DID topic can send this transaction directly.
-Other DID Subjects shall use appnet's defined relay interface.
-
 ### Delete (Revoke)
 A DID document is created within the appnet by sending a `ConsensusSubmitMessage` transaction to Hedera node. It is executed by sending a `submitMessage` RPC call to HCS with the `ConsensusSubmitMessageTransactionBody` containing:
 - `topicID` - equal to the ID of appnet's DID topic
 - `message` - a JSON DID message described above with `didOperation` set to `delete`
 
-DID Subjects, who have their own accounts on Hedera network and are authorized to submit messages to appnet's DID topic can send this transaction directly.
-Other DID Subjects shall use appnet's defined relay interface.
-
 Appnets shall delete the DID document from their storage or mark it as revoked upon receiving this message from Hedera MirrorNet.
+
+### Appnet Relay Interface for CRUD Operations
+DID Subjects, who have their own accounts on Hedera network and are authorized to submit messages to appnet's DID topic can send CRUD transactions directly to the hedera node. Other DID Subjects shall use appnet's relay interface that will send the messages for them. The access to appnet CRUD relay interface is defined by each appnet owner, so authentication and authorization mechanisms are out of scope. This specification only defines a common REST API interface for each CRUD operation. The interface path is relative to the service URLs defined in the appnet's address book file.
+
+All API operations shall have the same error response content as the following example:
+```json
+{
+  "error" : {
+    "code" : 404,
+    "message" : "You are unauthorized to make this request."
+  }
+}
+```
+
+#### Create
+Publishes a new DID document to the appnet's DID topic. The mode in which the DID document is published (plain or encrypted) is defined on the appnet level and shall be transparent to the API users.
+
+- __URL:__ `/did/`
+- __Method:__ `GET`
+- __Content Type:__ `application/json`
+- __URL Parameters:__ *None*
+- __Request Body:__
+```json
+{
+  "did": "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm;hedera:mainnet:fid=0.0.123",
+  "didDocumentBase64": "ewogICJAY29udGV...9tL3ZjLyIKICAgIH0KICBdCn0=",
+  "signature": "QNB13Y7Q9...1tzjn4w=="
+}
+```
+- __Success Response:__
+  - __Code:__ `200 OK`
+- __Error Response:__
+  - __Code:__ `401 UNAUTHORIZED`
+  - __Code:__ `500 INTERNAL SERVER ERROR`
+
+#### Read
+Resolves a given DID into a full DID document.
+
+- __URL:__ `/did/`
+- __Method:__ `GET`
+- __Content Type:__ `application/json`
+- __URL Parameters:__ *None*
+- __Request Body:__
+```json
+{
+  "did": "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm;hedera:mainnet:fid=0.0.123",
+}
+```
+- __Success Response:__
+  - __Code:__ `200 OK`
+  - __Response Body:__
+The latest version of DID document in a plain form, e.g.:
+```json
+{
+  "@context": "https://www.w3.org/ns/did/v1",
+  "id": "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm;hedera:mainnet:fid=0.0.123",
+  "authentication": [
+    "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm;hedera:mainnet:fid=0.0.123#did-root-key"
+  ],
+  "publicKey": [
+    {
+      "id": "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm;hedera:mainnet:fid=0.0.123#did-root-key",
+      "type": "Ed25519VerificationKey2018",
+      "controller": "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm;hedera:mainnet:fid=0.0.123",
+      "publicKeyBase58": "H3C2AVvLMv6gmMNam3uVAjZpfkcJCwDwnZn6z3wXmqPV"
+    }
+  ],
+  "service": [
+    {
+      "id": "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm;hedera:mainnet:fid=0.0.123#vcs",
+      "type": "VerifiableCredentialService",
+      "serviceEndpoint": "https://example.com/vc/"
+    }
+  ]
+}
+```
+  - __Code:__ `200 OK`
+- __Error Response:__
+  - __Code:__ `401 UNAUTHORIZED`
+  - __Code:__ `404 NOT FOUND`
+  - __Code:__ `500 INTERNAL SERVER ERROR`
+
+#### Update
+Updates the DID document on the appnet network.
+
+- __URL:__ `/did/`
+- __Method:__ `PUT`
+- __Content Type:__ `application/json`
+- __URL Parameters:__ *None*
+- __Request Body:__
+```json
+{
+  "did": "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm;hedera:mainnet:fid=0.0.123",
+  "didDocumentBase64": "ewogICJAY29udGV...9tL3ZjLyIKICAgIH0KICBdCn0=",
+  "signature": "QNB13Y7Q9...1tzjn4w=="
+}
+```
+- __Success Response:__
+  - __Code:__ `200 OK`
+  - __Code:__ `200 OK`
+- __Error Response:__
+  - __Code:__ `401 UNAUTHORIZED`
+  - __Code:__ `404 NOT FOUND`
+  - __Code:__ `500 INTERNAL SERVER ERROR`
+
+#### Delete (Revoke)
+Deletes or revokes a DID document on the appnet network. The DID document submitted here should have at least `authentication` part empty, so that any subsequent DID ownership verification will fail.
+Depending on appnet's storage implementation the DID document may be completely removed or only marked as revoked.
+
+- __URL:__ `/did/`
+- __Method:__ `DELETE`
+- __Content Type:__ `application/json`
+- __URL Parameters:__ *None*
+- __Request Body:__
+```json
+{
+  "did": "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm;hedera:mainnet:fid=0.0.123",
+  "didDocumentBase64": "ewogICJAY29udGV...9tL3ZjLyIKICAgIH0KICBdCn0=",
+  "signature": "QNB13Y7Q9...1tzjn4w=="
+}
+```
+- __Success Response:__
+  - __Code:__ `200 OK`
+  - __Code:__ `200 OK`
+- __Error Response:__
+  - __Code:__ `401 UNAUTHORIZED`
+  - __Code:__ `404 NOT FOUND`
+  - __Code:__ `500 INTERNAL SERVER ERROR`
 
 ## Security Considerations
 Security of Hedera DIDs inherits security properties of Hedera Hashgraph network itself and specific implementation of appnet creators.
