@@ -134,7 +134,7 @@ Example address book file content:
 
 ## CRUD Operations
 Hedera nodes support a Consensus Service API by which clients submit transaction messages to a topic. Valid and authorized messages on valid topics will be ordered by the consensus service, gossiped to the mirror net, and published (in order) to all subscribers (from the mirror net) on this topic. Every appnet that implements Hedera DID method must have a dedicated HCS topic created for DID documents registration. Appnets shall subscribe to their topics, capture and store valid DID document messages. A valid CRUD message of a DID document must have a JSON structure defined by a [did-message-schema](did-message.schema.json) and contains the following properties:
-- `didOperation` - Operation to be performed on the DID document. Valid values are: `createOrUpdate` and `delete`.
+- `didOperation` - Operation to be performed on the DID document. Valid values are: `create`, `update` and `delete`.
 - `mode` - Describes the mode in which DID document is provided in this message. Valid values are: `plain` or `encrypted`.
 - `did` -  - This field may contain either: 
   - a plain DID,
@@ -149,7 +149,7 @@ There is no on-chain mechanism that would validate incoming messages content, so
 Here is an example message content:
 ```json
 {
-  "didOperation": "createOrUpdate",
+  "didOperation": "create",
   "mode": "plain",
   "did": "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm;hedera:mainnet:fid=0.0.123",
   "didDocumentBase64": "ewogICJAY29udGV...9tL3ZjLyIKICAgIH0KICBdCn0=",
@@ -162,7 +162,7 @@ It is a responsibility of the appnet owners to decide who can submit messages to
 ### Create
 A DID document is created within the appnet by sending a `ConsensusSubmitMessage` transaction to Hedera node. It is executed by sending a `submitMessage` RPC call to HCS with the `ConsensusSubmitMessageTransactionBody` containing:
 - `topicID` - equal to the ID of appnet's DID topic
-- `message` - a JSON DID message described above with `didOperation` set to `createOrUpdate`
+- `message` - a JSON DID message described above with `didOperation` set to `create`
 
 ### Read
 A Hedera DID can be resolved by anyone on the network providing that DID documents were submitted to the appnet topic in a plain form.
@@ -188,10 +188,10 @@ new MirrorConsensusTopicQuery()
 ### Update
 A DID document is updated within the appnet by sending a `ConsensusSubmitMessage` transaction to Hedera node. It is executed by sending a `submitMessage` RPC call to HCS with the `ConsensusSubmitMessageTransactionBody` containing:
 - `topicID` - equal to the ID of appnet's DID topic
-- `message` - a JSON DID message described above with `didOperation` set to `createOrUpdate`
+- `message` - a JSON DID message described above with `didOperation` set to `update`
 
 ### Delete (Revoke)
-A DID document is created within the appnet by sending a `ConsensusSubmitMessage` transaction to Hedera node. It is executed by sending a `submitMessage` RPC call to HCS with the `ConsensusSubmitMessageTransactionBody` containing:
+A DID document is deleted within the appnet by sending a `ConsensusSubmitMessage` transaction to Hedera node. It is executed by sending a `submitMessage` RPC call to HCS with the `ConsensusSubmitMessageTransactionBody` containing:
 - `topicID` - equal to the ID of appnet's DID topic
 - `message` - a JSON DID message described above with `didOperation` set to `delete`
 
@@ -214,7 +214,7 @@ All API operations shall have the same error response content as the following e
 Publishes a new DID document to the appnet's DID topic. The mode in which the DID document is published (plain or encrypted) is defined on the appnet level and shall be transparent to the API users.
 
 - __URL:__ `/did/`
-- __Method:__ `GET`
+- __Method:__ `POST`
 - __Content Type:__ `application/json`
 - __URL Parameters:__ *None*
 - __Request Body:__
