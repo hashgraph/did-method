@@ -1,0 +1,68 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "type": "object",
+  "title": "Hedera DID Message Schema",
+  "description": "The schema describing Hedera HCS DID message.",
+  "required": [
+    "didOperation",
+    "mode",
+    "did",
+    "didDocumentBase64",
+    "signature"
+  ],
+  "properties": {
+    "didOperation": {
+      "$id": "#/properties/didOperation",
+      "type": "string",
+      "title": "The DID operation name",
+      "description": "An operation name to be performed on the DID.",
+      "default": "",
+      "examples": [
+        "create",
+        "update",
+        "delete"
+      ]
+    },
+    "mode": {
+      "$id": "#/properties/mode",
+      "type": "string",
+      "title": "The DID document publishing mode",
+      "description": "The mode in which document is published to the HCS topic. Can be plain or encrypted",
+      "default": "",
+      "examples": [
+        "plain",
+        "encrypted"
+      ]
+    },
+    "did": {
+      "$id": "#/properties/did",
+      "type": "string",
+      "title": "The DID",
+      "description": "The Decentralized Identifier",
+      "default": "",
+      "examples": [
+        "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm;hedera:mainnet:fid=0.0.123"
+      ]
+    },
+    "didDocumentBase64": {
+      "$id": "#/properties/didDocumentBase64",
+      "type": "string",
+      "title": "The DID Document",
+      "description": "The Base64-encoded DID Document or it's encrypted representation",
+      "default": "",
+      "examples": [
+        "ewogICJAY29udGV...9tL3ZjLyIKICAgIH0KICBdCn0="
+      ]
+    },
+    "signature": {
+      "$id": "#/properties/signature",
+      "type": "string",
+      "title": "DID Document signature",
+      "description": "The signature of Base64-encoded plain DID document.",
+      "default": "",
+      "examples": [
+        "QNB13Y7Q9...1tzjn4w=="
+      ]
+    }
+  }
+}
