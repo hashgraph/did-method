@@ -136,6 +136,9 @@ Example address book file content:
 Hedera nodes support a Consensus Service API by which clients submit transaction messages to a topic. Valid and authorized messages on valid topics will be ordered by the consensus service, gossiped to the mirror net, and published (in order) to all subscribers (from the mirror net) on this topic. Every appnet that implements Hedera DID method must have a dedicated HCS topic created for DID documents registration. Appnets shall subscribe to their topics, capture and store valid DID document messages. A valid CRUD message of a DID document must have a JSON structure defined by a [did-message-schema](did-message.schema.json) and contains the following properties:
 - `didOperation` - Operation to be performed on the DID document. Valid values are: `createOrUpdate` and `delete`.
 - `mode` - Describes the mode in which DID document is provided in this message. Valid values are: `plain` or `encrypted`.
+- `did` -  - This field may contain either: 
+  - a plain DID,
+  - or an encrypted representation of the DID, where the encryption and decryption methods and keys are defined by appnet owners.
 - `didDocumentBase64` - This field may contain either: 
   - a string that represents Base64-encoded plain DID document that conforms to the [DID Specification](https://w3c.github.io/did-core/),
   - or an encrypted representation of this Base64 string, where the encryption and decryption methods and keys are defined by appnet owners.
@@ -148,6 +151,7 @@ Here is an example message content:
 {
   "didOperation": "createOrUpdate",
   "mode": "plain",
+  "did": "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm;hedera:mainnet:fid=0.0.123",
   "didDocumentBase64": "ewogICJAY29udGV...9tL3ZjLyIKICAgIH0KICBdCn0=",
   "signature":  "QNB13Y7Q9...1tzjn4w=="
 }
@@ -164,10 +168,21 @@ A DID document is created within the appnet by sending a `ConsensusSubmitMessage
 A Hedera DID can be resolved by anyone on the network providing that DID documents were submitted to the appnet topic in a plain form.
 In this case resolution requires reading the latest transaction message submitted to a DID topic for the given DID and checking if there was no earlier transaction for this DID with `didOperation` set to `delete`. This method can only be executed on a mirror node and may require reading a full history of messages in the topic. That is why it is only recommended in cases when resolving party does not trust an appnet or wants to verify its trust against the ledger.
 
-In other cases it is much more performant to resolve the DID directly by calling appnet service. If appnet DID topic operated in an encrypted mode and the verifier is not in possession of a decryption key, appnet service is the only way of resolution.
+In other cases it is much more performant to resolve the DID directly by calling appnet relay service (defined below). If appnet DID topic operated in an encrypted mode and the verifier is not in possession of a decryption key, appnet service is the only way of resolution.
 
-```
-TODO define appnet service and provide mirrornet API example for resolution
+Hedera mirror nodes provide a [Hedera Consensus Service gRPC API](https://docs.hedera.com/guides/docs/mirror-node-api/hedera-consensus-service-api-1). Client applications shall use this API to subscribe to the appnet's DID topic to recieve DID messages submitted to it and filter those that contain the DID to be resolved.
+
+Here is an example Java client, please refer to the official Hedera documentation for more information:
+```java
+new MirrorConsensusTopicQuery()
+    .setTopicId(didTopicId)
+    .subscribe(mirrorClient, resp -> {
+          String didMessage = new String(resp.message, StandardCharsets.UTF_8);
+          System.out.println(resp.consensusTimestamp + " received DID message: " + didMessage);
+      },
+      // On gRPC error, print the stack trace
+      Throwable::printStackTrace);
+    });
 ```
 
 ### Update
