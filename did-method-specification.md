@@ -295,7 +295,6 @@ Updates the DID document on the appnet network.
 ```
 - __Success Response:__
   - __Code:__ `200 OK`
-  - __Code:__ `200 OK`
 - __Error Response:__
   - __Code:__ `401 UNAUTHORIZED`
   - __Code:__ `404 NOT FOUND`
@@ -318,7 +317,6 @@ Depending on appnet's storage implementation the DID document may be completely 
 }
 ```
 - __Success Response:__
-  - __Code:__ `200 OK`
   - __Code:__ `200 OK`
 - __Error Response:__
   - __Code:__ `401 UNAUTHORIZED`
