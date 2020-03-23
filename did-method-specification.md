@@ -33,7 +33,7 @@ This [DID method specification](https://w3c-ccg.github.io/did-spec/#specific-did
 The following DID Method will be registered in the [DID Method Registry](https://w3c-ccg.github.io/did-method-registry/).
 
 ## Abstract
-Hedera Hashgraph is a multi-purpose permissionless public ledger that uses hashgraph consensus, a faster, more secure alternative to blockchain consensus mechanisms.
+Hedera Hashgraph is a multi-purpose open public ledger that uses hashgraph consensus - a fast, fair, and secure alternative to blockchains.
 
 ## Status of This Document
 This document was published as an Editor's Draft.
@@ -41,7 +41,7 @@ This document was published as an Editor's Draft.
 Publication as an Editor's Draft does not imply endorsement by the W3C Membership. This is a draft document and may be updated, replaced or obsoleted by other documents at any time. It is inappropriate to cite this document as other than a work in progress.
 
 ## Motivation
-The general objective is to bind the Decentralized Identifier architecture to Hedera Hashgraph leveraging the native functionality of Hedera Consensus Service for appropriate mechanisms of DID documents and Hedera File Service to manage networks of trust defined by custom appnet implementations.
+This document defines a binding of the Decentralized Identifier architecture to Hedera Hashgraph - specifically how to use the Hedera File Service to record membership in 'application networks' (appnets) and how to use the Hedera Consensus Service (HCS) for CRUD mechanisms on DID documents stored in such appnets. An appnet is a network of computers that store some set of business data (such as DID Documents) in a shared state, and rely on the Hedera mainnet for timestamping and ordering the transactions that cause that appnet state to change. An appnet could be exclusively dedicated to managing DID Documents and other identity artifacts in its state, or it could itself be multi-purpose. For instance, a Supply Chain could establish an appnet and, in addition to using HCS for tracking the location of shipments, use the DID method defined here to manage the identities of the companies, employees, and IoT devices. The HCS model is designed to off load from the Hedera mainnet node the burden of disk writes and long term storage and so allow those nodes to be optimized for high throughput ordering of transactions. 
 
 ## Hedera Hashgraph DID Method
 The namestring that shall identify this DID method is: `hedera`
@@ -75,7 +75,7 @@ Example:
 did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm;hedera:mainnet:fid=0.0.123
 ```
 
-The method specific identifier `hedera-specific-idstring` is composed of a Hedera network identifier with a `:` separator followed by a `hedera-base58-key` identifier which is a base58-encoded SHA-256 hash of a DID root public key and then method specific parameters `fid` and optionally `tid` (see details below). 
+The method specific identifier `hedera-specific-idstring` is composed of a Hedera network identifier with a `:` separator followed by a `hedera-base58-key` identifier which is a base58-encoded SHA-256 hash of a DID root public key (see details below). 
 
 Hedera DIDs are not required to be registered on the ledger and may be used as unregistered pseudonymous pairwise identifiers. However, these identifiers may also be registered on the ledger within a specific appnet and be publicly resolvable or with access restriction defined by appnet owners. 
 
@@ -108,32 +108,48 @@ Example Hedera DID document:
 ```
 
 #### Method-Specific DID URL Parameters
-There are two method-specific parameters defined in Hedera DID:
-- `fid` - a mandatory parameter that defines an ID of an appnet's address book file. 
-- `tid` - an optional parameter that defines an ID of Hedera Consensus Service topic to which DID document was posted. This can be used in case of open and publicly available DID documents to resolve DIDs without the use of appnet services.
+There are two method-specific parameters defined for a Hedera DID:
+- `fid` - a mandatory parameter that defines the FileID of a the corresponding appnet's address book file. The first step in resolving a DID is to retrieve the address book from the Hedera mainnet, and so determine the addresses of the members of the appnet against which the second step of resolution can be performed. 
+- `tid` - an optional parameter that defines a TopicID of Hedera Consensus Service topic to which a particular DID document was submitted. This can be used in case of open and publicly available DID documents to resolve DIDs without the use of appnet services.
 
-Hedera FileID is a triplet of numbers, e.g. `1.5.34634` represents file number `34634` within realm `5` within shard `1`.
+A Hedera FileID is a triplet of numbers, e.g. `1.5.34634` represents file number `34634` within realm `5` within shard `1`.
 Hedera TopicID follows a similar format and is defined as a triplet of numbers, e.g. `0.0.21243` represents a topic identifier `21243` within realm `0` within shard `0`.
 
 ##### Appnet Address Book
-Each appnet that utilizes Hedera DID Method must define an address book file stored in Hedera File Service. The file contains URLs of appnet's servers that provide CRUD services for the DIDs within this network and Topic IDs within Hedera network used for posting DID and verifiable credentials. The address book is a JSON file compatible with a JSON schema defined [here](appnet-address-book.schema.json).
+Each appnet that utilizes the Hedera DID Method must create and manage an address book file stored in the Hedera File Service. Unlike DID Documents which are persisted in an appnet's state, appnet address books are persisted in the state of the Hedera mainnet nodes on the file service. The Hedera mainnet conseqiuently provides a decentralized and trusted discovery mechanism for appnet address books. The address book file contains URLs of the indivodual servers that comprise the appnet and that provide CRUD services for the DIDs within this appnet and Topic IDs within Hedera network used for posting DID and verifiable credentials. The address book is a JSON file compatible with a JSON schema defined [here](appnet-address-book.schema.json). 
 
 Example address book file content:
 ```json
 {
 	"appnetName": "My AppNet",
-	"didTopicId": "0.0.1",
-	"vcTopicId": "0.0.2",
+	"didTopicId": "0.0.12345",
+	"vcTopicId": "0.0.23456",
 	"appnetDIDServers": [
-		"https://example.com/myappnet/hedera/api", 
-		"https://example2.com/myappnet/api/v1", 
-		"https://example3.com/myappnet"
+		"https://example.com/myappnet/did", 
+		"https://example2.com/myappnet/did", 
+		"https://example3.com/myappnet/did"
 	]
 }
 ```
 
 ## CRUD Operations
-Hedera nodes support a Consensus Service API by which clients submit transaction messages to a topic. Valid and authorized messages on valid topics will be ordered by the consensus service, gossiped to the mirror net, and published (in order) to all subscribers (from the mirror net) on this topic. Every appnet that implements Hedera DID method must have a dedicated HCS topic created for DID documents registration. Appnets shall subscribe to their topics, capture and store valid DID document messages. A valid CRUD message of a DID document must have a JSON structure defined by a [did-message-schema](did-message.schema.json) and contains the following properties:
+Hedera mainnet nodes support a Consensus Service API by which clients submit transaction messages to a topic - these transactions assigned a cosnensus timestamp and order before flowing back out to mirror nodes and any appnets subscribed to the relevamt topic. Every appnet that implements the Hedera DID method must have a dedicated HCS topic created for DID documents registration. Members of the appnet will subscribe to the corresponding topics, and consesequently retrieve and store valid DID documents submitted to the topic. 
+
+Create, Update and Delete operations against a DID Document are submitted via the Consensus Service API, either directly by a DID Owner or indirectly by an appnet member on behalf of a DID Owner
+
+The two alternatives are 
+
+DID Owner - HCS -> Main - gossip -> Mirror - gRPC -> Appnet
+DID Owner - REST -> Appnet - HCS -> Main - gossip -> Mirror - gRPC -> Appnet
+
+The Read operation happens against either a mirror node or a member of the relevant appnet for the DID in question. 
+
+The two alternatives are
+
+Resolver - gRPC -> Mirror
+Resolver - REST -> Appnet
+
+A valid CRUD message must have a JSON structure defined by a [did-message-schema](did-message.schema.json) and contains the following properties:
 - `didOperation` - Operation to be performed on the DID document. Valid values are: `create`, `update` and `delete`.
 - `mode` - Describes the mode in which DID document is provided in this message. Valid values are: `plain` or `encrypted`.
 - `did` -  - This field may contain either: 
@@ -144,7 +160,7 @@ Hedera nodes support a Consensus Service API by which clients submit transaction
   - or an encrypted representation of this Base64 string, where the encryption and decryption methods and keys are defined by appnet owners.
 - `signature` - A signature that is a result of signing a string that represents Base64-encoded plain DID document with a private key corresponding to the public key `#did-root-key` in the DID document.
 
-There is no on-chain mechanism that would validate incoming messages content, so appnet's subscription logic must recognize and validate them based on the above criteria.
+Neither the Hedera mainnet nor mirror nodes validate the DID Documents against the above requirements - it is appnets that, as part of their subscription logic, must validate DID Documents based on the above criteria.
 
 Here is an example message content:
 ```json
@@ -157,20 +173,23 @@ Here is an example message content:
 }
 ```
 
-It is a responsibility of the appnet owners to decide who can submit messages to their DID topic. Access control of message submission is defined by a `submitKey` property of `ConsensusCreateTopicTransaction` body. Detailed information on Hedera Consensus Service APIs can be found in the official [Hedera API documentation](https://docs.hedera.com/hedera-api/consensus/consensusservice).
+It is a responsibility of an appnet's administrators to decide who can submit messages to their DID topic. Access control of message submission is defined by a `submitKey` property of `ConsensusCreateTopicTransaction` body. If no `submitKey` is defined for a topic, then any party can submit messages against the topic. Detailed information on Hedera Consensus Service APIs can be found in the official [Hedera API documentation](https://docs.hedera.com/hedera-api/consensus/consensusservice).
 
 ### Create
-A DID document is created within the appnet by sending a `ConsensusSubmitMessage` transaction to Hedera node. It is executed by sending a `submitMessage` RPC call to HCS with the `ConsensusSubmitMessageTransactionBody` containing:
+A DID document is created within a particular appnet by sending a `ConsensusSubmitMessage` transaction to a Hedera mainnet node. It is executed by sending a `submitMessage` RPC call to the HCS API with the `ConsensusSubmitMessageTransactionBody` containing:
 - `topicID` - equal to the ID of appnet's DID topic
 - `message` - a JSON DID message described above with `didOperation` set to `create`
 
+Appnet members subscribed to this DID topic shall store the DID document in their local upon receiving this message from a mirror.
+
 ### Read
-A Hedera DID can be resolved by anyone on the network providing that DID documents were submitted to the appnet topic in a plain form.
-In this case resolution requires reading the latest transaction message submitted to a DID topic for the given DID and checking if there was no earlier transaction for this DID with `didOperation` set to `delete`. This method can only be executed on a mirror node and may require reading a full history of messages in the topic. That is why it is only recommended in cases when resolving party does not trust an appnet or wants to verify its trust against the ledger.
+Read, or DID resolution, does not occur via HCS messages but rather directly against a node that has persisted the DID Document.
 
-In other cases it is much more performant to resolve the DID directly by calling appnet relay service (defined below). If appnet DID topic operated in an encrypted mode and the verifier is not in possession of a decryption key, appnet service is the only way of resolution.
+How resolution of a DID into the corresponding DID Document occurs depends on whether the DID Document was submitted in encrypted or plaintext mode and, where resolution happens.
 
-Hedera mirror nodes provide a [Hedera Consensus Service gRPC API](https://docs.hedera.com/guides/docs/mirror-node-api/hedera-consensus-service-api-1). Client applications shall use this API to subscribe to the appnet's DID topic to recieve DID messages submitted to it and filter those that contain the DID to be resolved.
+If submitted in plaintext mode, then resolution can occur either against a mirror node that may have persisted the history of messages for that DID Document, or against a member of the appnet that persisted the DID Document.
+
+If resolved against a mirror, resolution requires reading the latest transaction message submitted to a DID topic for the given DID and checking if there was no earlier transaction for this DID with `didOperation` set to `delete`. This method can only be executed on a mirror node and may require reading a full history of messages in the topic. edera mirror nodes provide a [Hedera Consensus Service gRPC API](https://docs.hedera.com/guides/docs/mirror-node-api/hedera-consensus-service-api-1). Client applications can use this API to subscribe to an appnet's DID topic to receive DID messages submitted to it and filter those that contain the DID to be resolved. 
 
 Here is an example Java client, please refer to the official Hedera documentation for more information:
 ```java
@@ -185,20 +204,29 @@ new MirrorConsensusTopicQuery()
     });
 ```
 
+If resolved against an appnet member, resolution requires calling appnet relay service (defined below). 
+
+If the DID Document were submitted in encrypted mode, then resolution against a mirror is not possible unless the verifier is in possession of a decryption key and the appnet service is the only way of resolution.
+
+
+
 ### Update
 A DID document is updated within the appnet by sending a `ConsensusSubmitMessage` transaction to Hedera node. It is executed by sending a `submitMessage` RPC call to HCS with the `ConsensusSubmitMessageTransactionBody` containing:
-- `topicID` - equal to the ID of appnet's DID topic
+- `topicID` - equal to the ID of the appropriate appnet's DID topic
 - `message` - a JSON DID message described above with `didOperation` set to `update`
 
+Appnet members subscribed to this DID topic shall replace the previous version of the DID document from their storage with this new version upon receiving this message from a mirror.
+
 ### Delete (Revoke)
-A DID document is deleted within the appnet by sending a `ConsensusSubmitMessage` transaction to Hedera node. It is executed by sending a `submitMessage` RPC call to HCS with the `ConsensusSubmitMessageTransactionBody` containing:
+A DID document is deleted within the appnet by sending a `ConsensusSubmitMessage` transaction to a Hedera mainnet node. It is executed by sending a `submitMessage` RPC call to HCS with the `ConsensusSubmitMessageTransactionBody` containing:
 - `topicID` - equal to the ID of appnet's DID topic
 - `message` - a JSON DID message described above with `didOperation` set to `delete`
 
-Appnets shall delete the DID document from their storage or mark it as revoked upon receiving this message from Hedera MirrorNet.
+Appnet members subscribed to this DID topic shall delete the DID document from their storage or mark it as revoked upon receiving this message from a mirror.
 
 ### Appnet Relay Interface for CRUD Operations
-DID Subjects, who have their own accounts on Hedera network and are authorized to submit messages to appnet's DID topic can send CRUD transactions directly to the hedera node. Other DID Subjects shall use appnet's relay interface that will send the messages for them. The access to appnet CRUD relay interface is defined by each appnet owner, so authentication and authorization mechanisms are out of scope. This specification only defines a common REST API interface for each CRUD operation. The interface path is relative to the service URLs defined in the appnet's address book file.
+
+DID Subjects, who have their own accounts on Hedera network and are authorized to submit messages to appnet's DID topic can send CRUD transactions directly to a Hedera mainnet node. Alternatively, a DID Subjects can use an appnet's relay interface that will send the HCS messages for them. The access to appnet CRUD relay interface is defined by each appnet owner, so authentication and authorization mechanisms are out of scope. This specification only defines a common REST API interface for each CRUD operation. The interface path is relative to the service URLs defined in the appnet's address book file.
 
 All API operations shall have the same error response content as the following example:
 ```json
@@ -211,7 +239,11 @@ All API operations shall have the same error response content as the following e
 ```
 
 #### Create
-Publishes a new DID document to the appnet's DID topic. The mode in which the DID document is published (plain or encrypted) is defined on the appnet level and shall be transparent to the API users.
+Requests that a new DID document be created on the appnet network.
+
+The DID Document is not considered to have been created until the DID Document was submitted to the HCS, received a consensus timestamp and order , been retrieved by the members of the appropriate appnet, and persisted in the appnet state.
+
+The mode in which the DID document is submitted (plain or encrypted) is defined on the appnet level and shall be transparent to the API users.
 
 - __URL:__ `/did/`
 - __Method:__ `POST`
@@ -232,7 +264,7 @@ Publishes a new DID document to the appnet's DID topic. The mode in which the DI
   - __Code:__ `500 INTERNAL SERVER ERROR`
 
 #### Read
-Resolves a given DID into a full DID document.
+Resolves a given DID into the corresponding full DID document.
 
 - __URL:__ `/did/`
 - __Method:__ `GET`
@@ -272,14 +304,16 @@ The latest version of DID document in a plain form, e.g.:
   ]
 }
 ```
-  - __Code:__ `200 OK`
+
 - __Error Response:__
   - __Code:__ `401 UNAUTHORIZED`
   - __Code:__ `404 NOT FOUND`
   - __Code:__ `500 INTERNAL SERVER ERROR`
 
 #### Update
-Updates the DID document on the appnet network.
+Requests that the DID document be updated on the appnet network.
+
+The DID Document is not considered to have been updated until the DID Document was submitted to the HCS, received a consensus timestamp and order , been retrieved by the members of the appropriate appnet, and persisted in the appnet state.
 
 - __URL:__ `/did/`
 - __Method:__ `PUT`
@@ -301,8 +335,11 @@ Updates the DID document on the appnet network.
   - __Code:__ `500 INTERNAL SERVER ERROR`
 
 #### Delete (Revoke)
-Deletes or revokes a DID document on the appnet network. The DID document submitted here should have at least `authentication` part empty, so that any subsequent DID ownership verification will fail.
-Depending on appnet's storage implementation the DID document may be completely removed or only marked as revoked.
+Requests that a given DID Document be deleted or revoked from the appnet network. The DID document submitted here should have at least `authentication` part empty, so that any subsequent DID ownership verification will fail.
+
+The DID Document is not considered to have been deleted until the DID Document was submitted to the HCS, received a consensus timestamp and order, been retrieved by the members of the appropriate appnet, and persisted in the appnet state.
+
+Depending on an appnet's storage implementation the DID document may be completely removed or instead only marked as revoked.
 
 - __URL:__ `/did/`
 - __Method:__ `DELETE`
@@ -324,17 +361,34 @@ Depending on appnet's storage implementation the DID document may be completely 
   - __Code:__ `500 INTERNAL SERVER ERROR`
 
 ## Security Considerations
+
+Should cover
+
+- what is persisted on main, mirrors, and appnet nodes
+- that which is persisted on mirrors may be encrypted
+
 Security of Hedera DIDs inherits security properties of Hedera Hashgraph network itself and specific implementation of appnet creators.
+
 Write access to Hedera Consensus Service DID Topics can be managed with advanced key structures and is defined by appnet administrators.
 
 Hedera currently stores only the following data on the ledger:
 
+paulM: eventually, both main & mirror nodes will establish and maintain the consensus state - they will collectively be the 'ledger'. Mirrors will also optionally persist the history of txs. Any particular appnet is free to store whatever they wish
+
 * Public DIDs/DID Documents that include public keys and service endpoints
 * Hashes of verifiable credentials issued by Hedera DID subjects.
+
+paulM: we woulkd likely want to persist VC hashes on an appnet as well, and not in the fileservice 
 
 All confidential information such as cryptographic private keys are stored with end consumers of Hedera DID.
 
 ## Privacy Considerations
+
+Should cover
+
+- what is persisted on main, mirrors, and appnet nodes
+- that which is persisted on mirrors may be encrypted
+
 For publicly available DIDs that can be resolved by anyone, care should be taken to ensure the DID Documents do not contain any sensitive personal information. One primary consideration is how do we support the deleting of personal information in Hedera network since it is effectively a blockchain. The answer is the same in this context as it is for other blockchain based DID systems: we do not store any personal information in the DID document. DID documents in Hedera should be limited to just public keys and service endpoints for key recovery.
 
 ## Reference Implementations
