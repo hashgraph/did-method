@@ -1,9 +1,9 @@
 # Hedera Hashgraph DID Method Specification
 Version 0.1, Swisscom Blockchain AG
  
-## Table of contents
+## Table of Contents
 - [Hedera Hashgraph DID Method Specification](#hedera-hashgraph-did-method-specification)
-  - [Table of contents](#table-of-contents)
+  - [Table of Contents](#table-of-contents)
   - [About](#about)
   - [Abstract](#abstract)
   - [Status of This Document](#status-of-this-document)
@@ -11,7 +11,7 @@ Version 0.1, Swisscom Blockchain AG
   - [Hedera Hashgraph DID Method](#hedera-hashgraph-did-method)
     - [Namespace Specific Identifier (NSI)](#namespace-specific-identifier-nsi)
       - [Method-Specific DID URL Parameters](#method-specific-did-url-parameters)
-        - [Appnet address book](#appnet-address-book)
+        - [Appnet Address Book](#appnet-address-book)
   - [CRUD Operations](#crud-operations)
     - [Create](#create)
     - [Read](#read)
@@ -67,14 +67,40 @@ base58 = "1" / "2" / "3" / "4" / "5" / "6" / "7" / "8" / "9" / "A" / "B" /
 
 Example:
 ```
-did:hedera:mainnet:4F1t4fSytDtyGnb6mXUYMQLGAbsNpg179uj2HT6xUZpx;hedera:mainnet:fid=0.0.123
+did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm;hedera:mainnet:fid=0.0.123
 ```
 
 The method specific identifier `hedera-specific-idstring` is composed of a Hedera network identifier with a `:` separator followed by a `hedera-base58-key` identifier which is a base58-encoded SHA-256 hash of a DID root public key (see details below). 
 
 Hedera DIDs are not required to be registered on the ledger and may be used as unregistered pseudonymous pairwise identifiers. However, these identifiers may also be registered on the ledger within a specific appnet and be publicly resolvable or with access restriction defined by appnet owners. 
 
-Every DID document registered on Hedera network MUST contain a public key of id `#did-root-key` and type supported by [DID Specification](https://w3c.github.io/did-core/) (e.g. `Ed25519VerificationKey2018`). The `hedera-base58-key` identifier is a base58-encoded SHA-256 hash of this public key. 
+Every DID document registered on Hedera network MUST contain a public key of id `#did-root-key` and type `Ed25519VerificationKey2018`. The `hedera-base58-key` identifier is a base58-encoded SHA-256 hash of this public key.
+
+Example Hedera DID document:
+```json
+{
+  "@context": "https://www.w3.org/ns/did/v1",
+  "id": "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm;hedera:mainnet:fid=0.0.123",
+  "authentication": [
+    "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm;hedera:mainnet:fid=0.0.123#did-root-key"
+  ],
+  "publicKey": [
+    {
+      "id": "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm;hedera:mainnet:fid=0.0.123#did-root-key",
+      "type": "Ed25519VerificationKey2018",
+      "controller": "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm;hedera:mainnet:fid=0.0.123",
+      "publicKeyBase58": "H3C2AVvLMv6gmMNam3uVAjZpfkcJCwDwnZn6z3wXmqPV"
+    }
+  ],
+  "service": [
+    {
+      "id": "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm;hedera:mainnet:fid=0.0.123#vcs",
+      "type": "VerifiableCredentialService",
+      "serviceEndpoint": "https://example.com/vc/"
+    }
+  ]
+}
+```
 
 #### Method-Specific DID URL Parameters
 There are two method-specific parameters defined in Hedera DID:
@@ -84,7 +110,7 @@ There are two method-specific parameters defined in Hedera DID:
 Hedera FileID is a triplet of numbers, e.g. `1.5.34634` represents file number `34634` within realm `5` within shard `1`.
 Hedera TopicID follows a similar format and is defined as a triplet of numbers, e.g. `0.0.21243` represents a topic identifier `21243` within realm `0` within shard `0`.
 
-##### Appnet address book
+##### Appnet Address Book
 Each appnet that utilizes Hedera DID Method must define an address book file stored in Hedera File Service. The file contains URLs of appnet's servers that provide CRUD services for the DIDs within this network and Topic IDs within Hedera network used for posting DID and verifiable credentials. The address book is a JSON file compatible with a JSON schema defined [here](appnet-address-book.schema.json).
 
 Example address book file content:
@@ -114,17 +140,12 @@ There is no on-chain mechanism that would validate incoming messages content, so
 
 
 Here is an example message content:
-
-```
-TODO: provide real example below
-```
-
 ```json
 {
   "didOperation": "createOrUpdate",
   "mode": "plain",
-  "didDocumentBase64": "<plain-or-encrypted-base64-encoded-did-document>",
-  "signature": "<signature of an unecrypted base64 string from didDocumentBase64 field signed by #did-root-key>"
+  "didDocumentBase64": "ewogICJAY29udGV...9tL3ZjLyIKICAgIH0KICBdCn0=",
+  "signature":  "QNB13Y7Q9...1tzjn4w=="
 }
 ```
 
@@ -140,7 +161,7 @@ DID Subjects, who have their own accounts on Hedera network and are authorized t
 Other DID Subjects shall use appnet's defined relay interface.
 
 ```
-TODO: should the relay interface (REST API) be specified here or left for appnets to define their own method?
+TODO: Specify appnet's relay interface (REST API)?
 ```
 
 ### Read
@@ -177,9 +198,6 @@ Write access to Hedera Consensus Service DID Topics can be managed with advanced
 
 Hedera currently stores only the following data on the ledger:
 
-```
-TODO: update the list below according to verifiable credentials design!
-``` 
 * Public DIDs/DID Documents that include public keys and service endpoints
 * Hashes of verifiable credentials issued by Hedera DID subjects.
 
