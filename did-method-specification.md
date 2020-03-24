@@ -364,32 +364,35 @@ Depending on an appnet's storage implementation the DID document may be complete
 
 ## Security Considerations
 
-Should cover
+Security of Hedera DID Documents inherits the security properties of Hedera Hashgraph network itself and specific implementation of appnets that persist the DID Documents.
 
-- what is persisted on main, mirrors, and appnet nodes
-- that which is persisted on mirrors may be encrypted
+Hedera Hashgraph uses the hashgraph algorithm for the consensus timestamping and ordering of transactions. Hashgraph is Asynchronous Byzantine Fault Tolerant (ABFT) and fair, in that no particular node has the sole authority to decide the order of transactions, even if only for a short period of time. 
 
-Security of Hedera DIDs inherits security properties of Hedera Hashgraph network itself and specific implementation of appnet creators.
+Hedera is a proof of stake model to mitigate Sybil attacks. 
 
-Write access to Hedera Consensus Service DID Topics can be managed with advanced key structures and is defined by appnet administrators.
+Hedera charges fees for the processing of transactions into consensus and to partially mitigate Denial of Service attacks.
 
-Hedera currently stores only the following data on the ledger:
+In the HCS model, messages are submitted to the Hedera network nodes, which collectively assign them a consensus timestamp and order within a topic, and then are deleted from those network consensus nodes. Consensus network nodes do not persist HCS messages beyond 3 minutes.
 
-paulM: eventually, both main & mirror nodes will establish and maintain the consensus state - they will collectively be the 'ledger'. Mirrors will also optionally persist the history of txs. Any particular appnet is free to store whatever they wish
+The messages are persisted only on mirror nodes, and appnet members that are subscribed to the corresponding topic.
 
-* Public DIDs/DID Documents that include public keys and service endpoints
-* Hashes of verifiable credentials issued by Hedera DID subjects.
+Mirrors may persist HCS messages and are presumed to be public. Consequently, any data sent via HCS messages should be encrypted if sensitive. 
 
-paulM: we woulkd likely want to persist VC hashes on an appnet as well, and not in the fileservice 
+A public DID Document can be sent unencrypted. Public DIDs/DID Documents include public keys and service endpoints
 
-All confidential information such as cryptographic private keys are stored with end consumers of Hedera DID.
+If it be undesirable that a DID Document be public, it can be encrypted such that only members of an appnet can read it, or even specific members of the appnet. HCS supports perfect forward secrecy through key rotation to mitigate the risk of encrypted DID Documents persisted on mirrors being decrypted. 
+
+Regardless of encryption, a DID Document should not include PII.
+
+Write access to Hedera Consensus Service DID Topics can be controlled by stipulating a list of public keys for the topic by appnet administrators. Only HCS messages signed by the corresponding private keys will be accepted. A key can be a "threshold key", which means a list of M keys, any N of which must sign in order for the threshold signature to be considered valid. The keys within a threshold signature may themselves be threshold signatures, to allow complex signature requirements. 
+
 
 ## Privacy Considerations
 
 Should cover
 
-- what is persisted on main, mirrors, and appnet nodes
-- that which is persisted on mirrors may be encrypted
+- correlation risk
+
 
 For publicly available DIDs that can be resolved by anyone, care should be taken to ensure the DID Documents do not contain any sensitive personal information. One primary consideration is how do we support the deleting of personal information in Hedera network since it is effectively a blockchain. The answer is the same in this context as it is for other blockchain based DID systems: we do not store any personal information in the DID document. DID documents in Hedera should be limited to just public keys and service endpoints for key recovery.
 
