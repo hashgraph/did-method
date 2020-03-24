@@ -1,5 +1,5 @@
 # Hedera Hashgraph DID Method Specification
-Version 0.1, Swisscom Blockchain AG
+Version 0.1, Hedera Hashgraph
  
 ## Table of Contents
 - [Hedera Hashgraph DID Method Specification](#hedera-hashgraph-did-method-specification)
@@ -389,12 +389,11 @@ Write access to Hedera Consensus Service DID Topics can be controlled by stipula
 
 ## Privacy Considerations
 
-Should cover
+TBD
 
 - correlation risk
+- point to encryption of DID Documents
 
-
-For publicly available DIDs that can be resolved by anyone, care should be taken to ensure the DID Documents do not contain any sensitive personal information. One primary consideration is how do we support the deleting of personal information in Hedera network since it is effectively a blockchain. The answer is the same in this context as it is for other blockchain based DID systems: we do not store any personal information in the DID document. DID documents in Hedera should be limited to just public keys and service endpoints for key recovery.
 
 ## Reference Implementations
 The code at [https://github.com/hashgraph/Identity-sdk](https://github.com/hashgraph/Identity-sdk) is intended to provide a Java SDK for this DID method specification. A set of unit tests within this repository presents a reference implementation of this DID method.
