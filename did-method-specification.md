@@ -228,7 +228,7 @@ Appnet members subscribed to this DID topic shall delete the DID document from t
 
 ### Appnet Relay Interface for CRUD Operations
 
-DID Subjects, who have their own accounts on the Hedera network and are authorized to submit messages to an appnet's DID topic can send Create, Update, and Delete HCS transactions directly to a Hedera network node. Alternatively, DID Subjects can use an appnet's relay interface that will send the HCS messages for them. The access to an appnet's CRUD relay interface is defined by each appnet owner, so authentication and authorization mechanisms are out of scope. This specification only defines a common REST API interface for each CRUD operation. The interface path is relative to the service URLs defined in the appnet's address book file.
+DID Controllers, who have their own accounts on the Hedera network and are authorized to submit messages to an appnet's DID topic can send Create, Update, and Delete HCS transactions directly to a Hedera network node. Alternatively, DID Controllers can use an appnet's relay interface that will send the HCS messages for them. The access to an appnet's CRUD relay interface is defined by each appnet owner, so authentication and authorization mechanisms are out of scope. This specification only defines a common REST API interface for each CRUD operation. The interface path is relative to the service URLs defined in the appnet's address book file.
 
 All API operations shall have the same error response content as the following example:
 ```json
