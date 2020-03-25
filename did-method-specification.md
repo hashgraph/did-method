@@ -75,7 +75,7 @@ Example:
 did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm;hedera:mainnet:fid=0.0.123
 ```
 
-The method specific identifier `hedera-specific-idstring` is composed of a Hedera network identifier with a `:` separator followed by a `hedera-base58-key` identifier which is a base58-encoded SHA-256 hash of a DID root public key (see details below). 
+The method specific identifier `hedera-specific-idstring` is composed of a Hedera network identifier with a `:` separator followed by a `hedera-base58-key` identifier which is a base58-encoded SHA-256 hash of a DID root public key and then method specific parameters `fid` and optionally `tid` (see details below). 
 
 Hedera DIDs are not required to be registered on the ledger and may be used as unregistered pseudonymous pairwise identifiers. However, these identifiers may also be registered on the ledger within a specific appnet and be publicly resolvable or with access restriction defined by appnet owners. 
 
@@ -125,9 +125,9 @@ Example address book file content:
 	"didTopicId": "0.0.12345",
 	"vcTopicId": "0.0.23456",
 	"appnetDIDServers": [
-		"https://example.com/myappnet/did", 
-		"https://example2.com/myappnet/did", 
-		"https://example3.com/myappnet/did"
+		"https://example.com/myappnet/hedera/api", 
+		"https://example2.com/myappnet/api/v1", 
+		"https://example3.com/myappnet"
 	]
 }
 ```
@@ -137,19 +137,11 @@ Hedera network nodes support a Consensus Service API by which clients submit tra
 
 Create, Update and Delete operations against a DID Document are submitted via the Consensus Service API, either directly by a DID Owner or indirectly by an appnet member on behalf of a DID Owner
 
-The two alternatives are 
+The two alternatives are:
+![alt text](./images/create-update-delete.flow.svg "Create, Update and Delete flow alternatives")
 
-DID Owner - HCS -> Main - gossip -> Mirror - gRPC -> Appnet
-
-DID Owner - REST -> Appnet - HCS -> Main - gossip -> Mirror - gRPC -> Appnet
-
-The Read operation happens against either a mirror node or a member of the relevant appnet for the DID in question. 
-
-The two alternatives are
-
-Resolver - gRPC -> Mirror
-
-Resolver - REST -> Appnet
+The Read operation happens against either a mirror node or a member of the relevant appnet for the DID in question. The two alternatives are:
+![alt text](./images/read.flow.svg "Read flow alternatives")
 
 A valid CRUD message must have a JSON structure defined by a [did-message-schema](did-message.schema.json) and contains the following properties:
 - `didOperation` - Operation to be performed on the DID document. Valid values are: `create`, `update` and `delete`.
