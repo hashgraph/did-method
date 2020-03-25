@@ -140,7 +140,9 @@ Create, Update and Delete operations against a DID Document are submitted via th
 The two alternatives are:
 ![alt text](./images/create-update-delete.flow.svg "Create, Update and Delete flow alternatives")
 
-The Read operation happens against either a mirror node or a member of the relevant appnet for the DID in question. The two alternatives are:
+The Read operation happens against either a mirror node or a member of the relevant appnet for the DID in question.
+
+The two alternatives are:
 ![alt text](./images/read.flow.svg "Read flow alternatives")
 
 A valid CRUD message must have a JSON structure defined by a [did-message-schema](did-message.schema.json) and contains the following properties:
