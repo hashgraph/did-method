@@ -394,6 +394,6 @@ The code at [https://github.com/hashgraph/Identity-sdk](https://github.com/hashg
 
 ## References
 * <https://w3c-ccg.github.io/did-spec/>
-* <https://github.com/hashgraph/Identity-sdk> 
+* <https://github.com/hashgraph/identity-sdk> 
 * <https://docs.hedera.com/hedera-api/>
 * <https://www.hedera.com/>
