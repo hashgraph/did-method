@@ -115,8 +115,10 @@ There are two method-specific parameters defined for a Hedera DID:
 A Hedera FileID is a triplet of numbers, e.g. `1.5.34634` represents file number `34634` within realm `5` within shard `1`.
 Hedera TopicID follows a similar format and is defined as a triplet of numbers, e.g. `0.0.21243` represents a topic identifier `21243` within realm `0` within shard `0`.
 
+Realms allow Solidity smart contracts to run in parallel. Realms are not relevant to this DID Method. In the future, when the number of consensus nodes warrants, the Hedera network will be divided up into shards such that a particular transaction will be processed into consensus only by a subset of the full set of nodes. 
+
 ##### Appnet Address Book
-Each appnet that utilizes the Hedera DID Method must create and manage an address book file stored in the Hedera File Service. Unlike DID Documents which are persisted in an appnet's state, appnet address books are persisted in the state of the Hedera network nodes on the file service. The Hedera network consequently provides a decentralized and trusted discovery mechanism for appnet address books. The address book file contains URLs of the indivodual servers that comprise the appnet and that provide CRUD services for the DIDs within this appnet and Topic IDs within Hedera network used for posting DID and verifiable credentials. The address book is a JSON file compatible with a JSON schema defined [here](appnet-address-book.schema.json). 
+Each appnet that utilizes the Hedera DID Method must create and manage an address book file stored in the Hedera File Service. Unlike DID Documents which are persisted in an appnet's state, appnet address books are persisted in the state of the Hedera network nodes on the file service. The Hedera network consequently provides a decentralized and trusted discovery mechanism for appnet address books. The address book file contains URLs of the individual servers that comprise the appnet and that provide CRUD services for the DIDs within this appnet and Topic IDs within Hedera network used for posting DID and verifiable credentials. The address book is a JSON file compatible with a JSON schema defined [here](appnet-address-book.schema.json). 
 
 Example address book file content:
 ```json
@@ -131,6 +133,7 @@ Example address book file content:
 	]
 }
 ```
+Specific authorizations for making change to the address book file for an appnet can be controlled via the list of keys associated with that file. Only transactions signed by the corresponding private keys will be authorized to update or delete the address book. Hedera supports hierarchical key structure to support a flexible authorization model.
 
 ## CRUD Operations
 Hedera network nodes support a Consensus Service API by which clients submit transaction messages to a topic - these transactions assigned a consensus timestamp and order before flowing back out to mirror nodes and any appnets subscribed to the relevamt topic. Every appnet that implements the Hedera DID method must have a dedicated HCS topic created for DID documents registration. Members of the appnet will subscribe to the corresponding topics, and consesequently retrieve and store valid DID documents submitted to the topic. 
@@ -145,7 +148,7 @@ The Read operation happens against either a mirror node or a member of the relev
 The two alternatives are:
 ![alt text](./images/read.flow.svg "Read flow alternatives")
 
-A valid CRUD message must have a JSON structure defined by a [did-message-schema](did-message.schema.json) and contains the following properties:
+A valid Create, Update, or Delete message must have a JSON structure defined by a [did-message-schema](did-message.schema.json) and contains the following properties:
 - `didOperation` - Operation to be performed on the DID document. Valid values are: `create`, `update` and `delete`.
 - `mode` - Describes the mode in which DID document is provided in this message. Valid values are: `plain` or `encrypted`.
 - `did` -  - This field may contain either: 
@@ -158,7 +161,7 @@ A valid CRUD message must have a JSON structure defined by a [did-message-schema
 
 Neither the Hedera network nor mirror nodes validate the DID Documents against the above requirements - it is appnets that, as part of their subscription logic, must validate DID Documents based on the above criteria.
 
-Here is an example message content:
+Here is an example message:
 ```json
 {
   "didOperation": "create",
@@ -179,7 +182,7 @@ A DID document is created within a particular appnet by sending a `ConsensusSubm
 Appnet members subscribed to this DID topic shall store the DID document in their local upon receiving this message from a mirror.
 
 ### Read
-Read, or DID resolution, does not occur via HCS messages but rather directly against a node that has persisted the DID Document.
+Read, or DID resolution, does not occur via HCS messages but rather directly against a computer that has persisted the DID Document.
 
 How resolution of a DID into the corresponding DID Document occurs depends on whether the DID Document was submitted in encrypted or plaintext mode and, where resolution happens.
 
@@ -213,12 +216,12 @@ A DID document is updated within the appnet by sending a `ConsensusSubmitMessage
 
 Appnet members subscribed to this DID topic shall replace the previous version of the DID document from their storage with this new version upon receiving this message from a mirror.
 
-### Delete (Revoke)
+### Delete 
 A DID document is deleted within the appnet by sending a `ConsensusSubmitMessage` transaction to a Hedera network node. It is executed by sending a `submitMessage` RPC call to HCS with the `ConsensusSubmitMessageTransactionBody` containing:
 - `topicID` - equal to the ID of appnet's DID topic
 - `message` - a JSON DID message described above with `didOperation` set to `delete`
 
-Appnet members subscribed to this DID topic shall delete the DID document from their storage or mark it as revoked upon receiving this message from a mirror.
+Appnet members subscribed to this DID topic shall delete the DID document from their storage or mark it as deleted upon receiving this message from a mirror.
 
 ### Appnet Relay Interface for CRUD Operations
 
@@ -330,12 +333,12 @@ The DID Document is not considered to have been updated until the DID Document w
   - __Code:__ `404 NOT FOUND`
   - __Code:__ `500 INTERNAL SERVER ERROR`
 
-#### Delete (Revoke)
+#### Delete 
 Requests that a given DID Document be deleted or revoked from the appnet network. The DID document submitted here should have at least `authentication` part empty, so that any subsequent DID ownership verification will fail.
 
 The DID Document is not considered to have been deleted until the DID Document was submitted to the HCS, received a consensus timestamp and order, been retrieved by the members of the appropriate appnet, and persisted in the appnet state.
 
-Depending on an appnet's storage implementation the DID document may be completely removed or instead only marked as revoked.
+Depending on an appnet's storage implementation the DID document may be completely removed or instead only marked as deleted.
 
 - __URL:__ `/did/`
 - __Method:__ `DELETE`
@@ -362,7 +365,7 @@ Security of Hedera DID Documents inherits the security properties of Hedera Hash
 
 Hedera Hashgraph uses the hashgraph algorithm for the consensus timestamping and ordering of transactions. Hashgraph is Asynchronous Byzantine Fault Tolerant (ABFT) and fair, in that no particular node has the sole authority to decide the order of transactions, even if only for a short period of time. 
 
-Hedera is a proof of stake model to mitigate Sybil attacks. 
+Hedera uses a proof of stake (POS) model to mitigate Sybil attacks. The influence of a particular node towards consensus is weighted by the amount of hbars, the network's native coin, they control.
 
 Hedera charges fees for the processing of transactions into consensus and to partially mitigate Denial of Service attacks.
 
