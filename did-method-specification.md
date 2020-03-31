@@ -363,7 +363,7 @@ Depending on an appnet's storage implementation the DID document may be complete
 
 Security of Hedera DID Documents inherits the security properties of Hedera Hashgraph network itself and specific implementation of appnets that persist the DID Documents.
 
-Hedera Hashgraph uses the hashgraph algorithm for the consensus timestamping and ordering of transactions. Hashgraph is Asynchronous Byzantine Fault Tolerant (ABFT) and fair, in that no particular node has the sole authority to decide the order of transactions, even if only for a short period of time. 
+Hedera Hashgraph uses the hashgraph algorithm for the consensus timestamping and ordering of transactions. Hashgraph is Asynchronous Byzantine Fault Tolerant (ABFT) and fair, in that no particular node has the sole authority to decide the order of transactions, not even for a short period of time. 
 
 Hedera uses a proof of stake (POS) model to mitigate Sybil attacks. The influence of a particular node towards consensus is weighted by the amount of hbars, the network's native coin, they control.
 
@@ -377,7 +377,7 @@ Mirrors may persist HCS messages and are presumed to be public. Consequently, an
 
 A public DID Document can be sent unencrypted. Public DIDs/DID Documents include public keys and service endpoints
 
-If it be undesirable that a DID Document be public, it can be encrypted such that only members of an appnet can read it, or even specific members of the appnet. HCS supports perfect forward secrecy through key rotation to mitigate the risk of encrypted DID Documents persisted on mirrors being decrypted. 
+If it be undesirable that a DID Document be public, it can be encrypted such that only members of an appnet can read it, or even specific members of the appnet. Appnets can change keys frequently to achieve perfect forward secrecy, and Hedera will release appnet libraries to automate this. 
 
 Regardless of encryption, a DID Document should not include PII.
 
