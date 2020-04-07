@@ -1,7 +1,7 @@
 # Hedera Hashgraph DID Method Specification
 Version 0.1, Hedera Hashgraph
  
-## Table of Contents
+## Table of Contents 
 - [Hedera Hashgraph DID Method Specification](#hedera-hashgraph-did-method-specification)
   - [Table of Contents](#table-of-contents)
   - [About](#about)
@@ -16,12 +16,12 @@ Version 0.1, Hedera Hashgraph
     - [Create](#create)
     - [Read](#read)
     - [Update](#update)
-    - [Delete (Revoke)](#delete-revoke)
+    - [Delete](#delete)
     - [Appnet Relay Interface for CRUD Operations](#appnet-relay-interface-for-crud-operations)
       - [Create](#create-1)
       - [Read](#read-1)
       - [Update](#update-1)
-      - [Delete (Revoke)](#delete-revoke-1)
+      - [Delete](#delete-1)
   - [Security Considerations](#security-considerations)
   - [Privacy Considerations](#privacy-considerations)
   - [Reference Implementations](#reference-implementations)
