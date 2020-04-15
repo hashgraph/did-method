@@ -153,11 +153,11 @@ A valid Create, Update, or Delete message must have a JSON structure defined by 
 - `mode` - Describes the mode in which DID document is provided in this message. Valid values are: `plain` or `encrypted`.
 - `did` -  - This field may contain either: 
   - a plain DID,
-  - or an encrypted representation of the DID, where the encryption and decryption methods and keys are defined by appnet owners.
+  - or a Base64-encoded encrypted representation of the DID, where the encryption and decryption methods and keys are defined by appnet owners.
 - `didDocumentBase64` - This field may contain either: 
   - a string that represents Base64-encoded plain DID document that conforms to the [DID Specification](https://w3c.github.io/did-core/),
-  - or an encrypted representation of this Base64 string, where the encryption and decryption methods and keys are defined by appnet owners.
-- `signature` - A signature that is a result of signing a string that represents Base64-encoded plain DID document with a private key corresponding to the public key `#did-root-key` in the DID document.
+  - or a Base64-encoded encrypted representation of Base64-encoded plain DID document, where the encryption and decryption methods and keys are defined by appnet owners.
+- `signature` - A Base64-encoded signature that is a result of signing a string that represents Base64-encoded plain DID document with a private key corresponding to the public key `#did-root-key` in the DID document.
 
 Neither the Hedera network nor mirror nodes validate the DID Documents against the above requirements - it is appnets that, as part of their subscription logic, must validate DID Documents based on the above criteria.
 
