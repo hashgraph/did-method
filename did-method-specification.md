@@ -188,7 +188,7 @@ How resolution of a DID into the corresponding DID Document occurs depends on wh
 
 If submitted in plaintext mode, then resolution can occur either against a mirror node that may have persisted the history of messages for that DID Document, or against a member of the appnet that persisted the DID Document.
 
-If resolved against a mirror, resolution requires reading the latest transaction message submitted to a DID topic for the given DID and checking if there was no earlier transaction for this DID with `didOperation` set to `delete`. This method can only be executed on a mirror node and may require reading a full history of messages in the topic. edera mirror nodes provide a [Hedera Consensus Service gRPC API](https://docs.hedera.com/guides/docs/mirror-node-api/hedera-consensus-service-api-1). Client applications can use this API to subscribe to an appnet's DID topic to receive DID messages submitted to it and filter those that contain the DID to be resolved. 
+If resolved against a mirror, resolution requires reading the latest transaction message submitted to a DID topic for the given DID and checking if there was no earlier transaction for this DID with `didOperation` set to `delete`. This method can only be executed on a mirror node and may require reading a full history of messages in the topic. Hedera mirror nodes provide a [Hedera Consensus Service gRPC API](https://docs.hedera.com/guides/docs/mirror-node-api/hedera-consensus-service-api-1). Client applications can use this API to subscribe to an appnet's DID topic to receive DID messages submitted to it and filter those that contain the DID to be resolved. 
 
 Here is an example Java client, please refer to the official Hedera documentation for more information:
 ```java
@@ -379,18 +379,16 @@ A public DID Document can be sent unencrypted. Public DIDs/DID Documents include
 
 If it be undesirable that a DID Document be public, it can be encrypted such that only members of an appnet can read it, or even specific members of the appnet. HCS supports perfect forward secrecy through key rotation to mitigate the risk of encrypted DID Documents persisted on mirrors being decrypted. 
 
-Regardless of encryption, a DID Document should not include PII.
-
 Write access to Hedera Consensus Service DID Topics can be controlled by stipulating a list of public keys for the topic by appnet administrators. Only HCS messages signed by the corresponding private keys will be accepted. A key can be a "threshold key", which means a list of M keys, any N of which must sign in order for the threshold signature to be considered valid. The keys within a threshold signature may themselves be threshold signatures, to allow complex signature requirements. 
 
 
 ## Privacy Considerations
 
-TBD
+Regardless of encryption, a DID Document should not include PII. 
 
-- correlation risk
-- point to encryption of DID Documents
+The identifiers used to identify a subject create a greater risk of correlation when those identifiers are long-lived or used across more than one application domain as those domains could use that shared handle for the subject to share information about that subject without their express consent.
 
+If DID Controllers want to mitigate the risk of correlation, they should use unique DIDs for every interaction and the corresponding DID Documents should contain a unique public key. 
 
 ## Reference Implementations
 The code at [https://github.com/hashgraph/Identity-sdk](https://github.com/hashgraph/Identity-sdk) is intended to provide a Java SDK for this DID method specification. A set of unit tests within this repository presents a reference implementation of this DID method.
