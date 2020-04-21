@@ -179,7 +179,7 @@ A DID document is created within a particular appnet by sending a `ConsensusSubm
 - `topicID` - equal to the ID of appnet's DID topic
 - `message` - a JSON DID message described above with `didOperation` set to `create`
 
-Appnet members subscribed to this DID topic shall store the DID document in their local upon receiving this message from a mirror.
+Appnet members subscribed to this DID topic shall store the DID document in their local storage upon receiving this message from a mirror.
 
 ### Read
 Read, or DID resolution, does not occur via HCS messages but rather directly against a computer that has persisted the DID Document.
@@ -216,6 +216,7 @@ A DID document is updated within the appnet by sending a `ConsensusSubmitMessage
 
 Appnet members subscribed to this DID topic shall replace the previous version of the DID document from their storage with this new version upon receiving this message from a mirror.
 
+
 ### Delete 
 A DID document is deleted within the appnet by sending a `ConsensusSubmitMessage` transaction to a Hedera network node. It is executed by sending a `submitMessage` RPC call to HCS with the `ConsensusSubmitMessageTransactionBody` containing:
 - `topicID` - equal to the ID of appnet's DID topic
@@ -241,6 +242,8 @@ All API operations shall have the same error response content as the following e
 Requests that a new DID document be created on the appnet network.
 
 The DID Document is not considered to have been created until the DID Document was submitted to the HCS, received a consensus timestamp and order , been retrieved by the members of the appropriate appnet, and persisted in the appnet state.
+
+The consensus timestamp assigned the Create message shall be interpreted as the time at which the DID Document was created, and used as the value of the 'created' property when the DID is subsequently resolved into the DID Document. 
 
 The mode in which the DID document is submitted (plain or encrypted) is defined on the appnet level and shall be transparent to the API users.
 
@@ -283,6 +286,7 @@ The latest version of DID document in a plain form, e.g.:
 {
   "@context": "https://www.w3.org/ns/did/v1",
   "id": "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm;hedera:mainnet:fid=0.0.123",
+  "created": "2020-04-21T17:34:00Z",
   "authentication": [
     "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm;hedera:mainnet:fid=0.0.123#did-root-key"
   ],
@@ -313,6 +317,8 @@ The latest version of DID document in a plain form, e.g.:
 Requests that the DID document be updated on the appnet network.
 
 The DID Document is not considered to have been updated until the DID Document was submitted to the HCS, received a consensus timestamp and order , been retrieved by the members of the appropriate appnet, and persisted in the appnet state.
+
+The consensus timestamp assigned the Update message shall be interpreted as the time at which the DID Document was updated, and used as the value of the 'updated' property when the DID is subsequently resolved into the DID Document. 
 
 - __URL:__ `/did/`
 - __Method:__ `PUT`
