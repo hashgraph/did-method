@@ -451,7 +451,7 @@ Depending on an appnet's storage implementation the DID document may be complete
 #### Submit
 Requests that a given operation on DID document be submitted to the DID topic of Hedera network.
 
-- __URL:__ `/did/submit`
+- __URL:__ `/did-submit`
 - __Method:__ `POST`
 - __Content Type:__ `application/json`
 - __URL Parameters:__ *None*
