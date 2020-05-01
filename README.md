@@ -1,7 +1,7 @@
 ![](https://www.hedera.com/logo-capital-hbar-wordmark.jpg)
 
 
-# Hedera™ Hashgraph DID
+# Hedera™ Hashgraph DID Method
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-green)](LICENSE)
 
 This repository contains the Hedera Hashgraph DID method specification.
