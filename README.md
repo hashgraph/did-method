@@ -10,7 +10,7 @@ This repository contains the Hedera Hashgraph DID method specification.
 The draft version of the Hedera Hashgraph DID Method Specification can be found [here](did-method-specification.md).
 
 ## Java SDK supporting the Hedera Hashgraph DID Method & Verifiable Credentials
-Java SDK source code is maintained in a separate repository at [here](https://github.com/hashgraph/did-sdk).
+Java SDK source code is maintained in a separate repository at [here](https://github.com/hashgraph/did-sdk-java).
 
 ## License Information
 Licensed under Apache License, Version 2.0 – see [LICENSE](LICENSE) in this repo or on the official Apache page  <http://www.apache.org/licenses/LICENSE-2.0>
