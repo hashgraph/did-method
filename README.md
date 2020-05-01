@@ -4,7 +4,7 @@
 # Hedera™ Hashgraph DID
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-green)](LICENSE)
 
-This repository contains Hedera Hashgraph DID method specification.
+This repository contains the Hedera Hashgraph DID method specification.
 
 ## DID Method Specification
 The draft version of the Hedera Hashgraph DID Method Specification can be found [here](did-method-specification.md).
