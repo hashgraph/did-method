@@ -9,7 +9,7 @@ This repository contains Hedera Hashgraph DID method specification.
 ## DID Method Specification
 The draft version of the Hedera Hashgraph DID Method Specification can be found [here](did-method-specification.md).
 
-## Java SDK for Hedera Hashgraph DID
+## Java SDK supporting the Hedera Hashgraph DID Method & Verifiable Credentials
 Java SDK source code is maintained in a separate respository that can be found [here](https://github.com/hashgraph/Identity-sdk).
 
 ## License Information
