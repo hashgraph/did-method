@@ -469,12 +469,10 @@ Requests that a given operation on DID document be submitted to the DID topic of
 }
 ```
 - __Success Response:__
-  - __Code:__ `200 OK`
+  - __Code:__ `202 ACCEPTED`
 - __Error Response:__
   - __Code:__ `401 UNAUTHORIZED`
   - __Code:__ `500 INTERNAL SERVER ERROR`
-
-
 
 ## Security Considerations
 
