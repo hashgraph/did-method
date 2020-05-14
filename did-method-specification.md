@@ -505,6 +505,8 @@ The identifiers used to identify a subject create a greater risk of correlation 
 
 If DID Controllers want to mitigate the risk of correlation, they should use unique DIDs for every interaction and the corresponding DID Documents should contain a unique public key. 
 
+The resolution process may leak PII as the resolver can infer that the Subject presenting the DID is interacting with the verifier resolving the DID. 
+
 ## Reference Implementations
 The code at [https://github.com/hashgraph/did-sdk-java](https://github.com/hashgraph/did-sdk-java) is intended to provide a Java SDK for this DID method specification. A set of unit tests and example appnet application within this repository present a reference implementation of this DID method.
 
