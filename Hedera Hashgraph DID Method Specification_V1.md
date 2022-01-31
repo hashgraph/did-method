@@ -49,7 +49,7 @@ The namestring that shall identify this DID method is: `hedera`
 
 A DID that uses this method MUST begin with the following prefix: `did:hedera`. Per the DID specification, this string MUST be in lowercase. The remainder of the DID, after the prefix, is the NSI specified below.
 
-### Namespace Specific Identifier (NSI)  (How to select the topic? - Toch appNet nodig?)
+### Namespace Specific Identifier (NSI)
 The `did:hedera` namestring is defined by the following ABNF:
 ```abnf
 hedera-did = "did:hedera:" hedera-specific-idstring "_" hedera-specific-parameters
@@ -72,11 +72,11 @@ Example:
 did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm_0.0.12345
 ```
 
-The method specific identifier `hedera-specific-idstring` is composed of a Hedera network identifier with a `:` separator followed by a `hedera-base58-key` identifier which is a base58-encoded SHA-256 hash of a DID root public key and a `did-topic-id` (see details below). 
+The method specific identifier `hedera-specific-idstring` is composed of a Hedera network identifier with a `:` separator followed by a `hedera-base58-key` identifier which is a base58 Encoded of a DID root public key and a `did-topic-id` (see details below). 
 
 Hedera DIDs are not required to be registered on the ledger and may be used as unregistered pseudonymous pairwise identifiers. However, these identifiers may also be registered on the ledger and be publicly resolvable.
 
-Every DID document registered on Hedera network MUST contain a public key of id `#did-root-key` and type `Ed25519VerificationKey2018`. The `hedera-base58-key` identifier is a base58-encoded SHA-256 hash of this public key.
+Every DID document registered on Hedera network MUST contain a public key of id `#did-root-key` and type `Ed25519VerificationKey2018`. The `hedera-base58-key` identifier is a base58 Encoded of this public key.
 
 Example Hedera DID document:
 ```json
@@ -254,9 +254,9 @@ Service event must have a JSON structure defined by a [did-message-schema](did-m
 ```
 
 
+### Operations
 
-
-### Create
+#### Create
 A DID Document is created implicit, by having hedera account, or via a transaction within a particular business application network by sending a `ConsensusSubmitMessage` transaction to a Hedera network node. 
 It is executed by sending a `submitMessage` RPC call to the HCS API with the `ConsensusSubmitMessageTransactionBody` containing:
 - `topicID` - equal to the ID of appnet's DID topic
@@ -264,7 +264,7 @@ It is executed by sending a `submitMessage` RPC call to the HCS API with the `Co
 
 Business application network members subscribed to this DID topic shall store the DID document in their local storage upon receiving this message from a mirror.
 
-### Read
+#### Read
 Read, or DID resolution, does not occur via HCS messages but rather directly against a computer that has persisted the DID Document.
 
 How resolution of a DID into the corresponding DID Document occurs depends on whether the DID Document was submitted in encrypted or plaintext mode and, where resolution happens.
@@ -291,24 +291,24 @@ If resolved against an business application network member, resolution requires 
 If the DID Document were submitted in encrypted mode, then resolution against a mirror is not possible unless the verifier is in possession of a decryption key and the business application network service is the only way of resolution.
 
 
-### Update
-A DID document is updated within the business application network by sending a `ConsensusSubmitMessage` transaction to a Hedera network node. It is executed by sending a `submitMessage` RPC call to HCS with the `ConsensusSubmitMessageTransactionBody` containing:
+#### Update
+A property or a DID document is updated by sending a `ConsensusSubmitMessage` transaction to a Hedera network node. It is executed by sending a `submitMessage` RPC call to HCS with the `ConsensusSubmitMessageTransactionBody` containing:
 - `topicID` - equal to the ID of the appropriate appnet's DID topic
 - `message` - a JSON DID message envelope described above with `operation` set to `update`
 
 Business application network members subscribed to this DID topic shall replace the previous version of the DID document from their storage with this new version upon receiving this message from a mirror.
 
 
-### Revoke 
-A DID document is deleted within the business application network by sending a `ConsensusSubmitMessage` transaction to a Hedera network node. It is executed by sending a `submitMessage` RPC call to HCS with the `ConsensusSubmitMessageTransactionBody` containing:
+#### Revoke 
+A property or a DID document is revoked by sending `ConsensusSubmitMessage` transaction to a Hedera network node. It is executed by sending a `submitMessage` RPC call to HCS with the `ConsensusSubmitMessageTransactionBody` containing:
 - `topicID` - equal to the ID of appnet's DID topic
-- `message` - a JSON DID message envelope described above with `operation` set to `delete` 
+- `message` - a JSON DID message envelope described above with `operation` set to `revoke` 
 Business application network members subscribed to this DID topic shall delete the DID document from their storage or mark it as deleted upon receiving this message from a mirror.
 
 
 
-### Delete 
-A DID document is deleted within the business application network by sending a `ConsensusSubmitMessage` transaction to a Hedera network node. It is executed by sending a `submitMessage` RPC call to HCS with the `ConsensusSubmitMessageTransactionBody` containing:
+#### Delete 
+A Whole DID document is deleted/nullified by sending `ConsensusSubmitMessage` transaction to a Hedera network node. It is executed by sending a `submitMessage` RPC call to HCS with the `ConsensusSubmitMessageTransactionBody` containing:
 - `topicID` - equal to the ID of appnet's DID topic
 - `message` - a JSON DID message envelope described above with `operation` set to `delete`
 
