@@ -153,6 +153,28 @@ It is a responsibility of an business application network's administrators to de
 
 ### Events
 
+#### DIDDocument
+
+A Hedera DID MAY be created creating a reference to a DID document available in [IPFS](https://ipfs.io/).
+
+`DIDDocument` event must have a JSON structure defined by a [DIDDocument-schema](DIDDocument.schema.json) and contains the following properties:
+- `DIDDocument` - The DIDOwner event with the following attributes:
+  - `id` - The Id property of the verification method.
+  - `type` - The document type, MAY include the DID document serialisation representation.
+  - `cid` - The DID of the entity that is authorized to make the change.
+  - `url` - A URL to the IPFS document MAY be included for convenience.
+
+```json
+{
+  "DIDDocument": {
+    "id": "did:hedera:testnet:z6MknSnvSESWvijDEysG1wHGnaiZSLSkQEXMECWvXWnd1uaJ_0.0.1723780",
+    "type": "DIDDocument",
+    "cid": "bafybeifn6wwfs355md56nhwaklgr2uvuoknnjobh2d2suzsdv6zpoxajfa/did-document.json",
+    "url": "https://ipfs.io/ipfs/bafybeifn6wwfs355md56nhwaklgr2uvuoknnjobh2d2suzsdv6zpoxajfa/did-document.json"
+  }
+}
+```
+
 #### DIDOwner
 
 Each identifier always has a controller address. By default, it is the same as the identifier address, however the resolver must validate this against the DID document. This controller address must be represented in the DID document as a verificationMethod entry with the id set as the DID being resolved and with the fragment `#did-root-key` appended to it. A reference to it must also be added to the authentication and assertionMethod arrays of the DID document.
