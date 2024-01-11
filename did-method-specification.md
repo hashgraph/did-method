@@ -1,5 +1,5 @@
 # Hedera Hashgraph DID Method Specification
-Version 0.1, Hedera Hashgraph
+Version 0.9, Hedera Hashgraph
  
 ## Table of Contents 
 - [Hedera Hashgraph DID Method Specification](#hedera-hashgraph-did-method-specification)
@@ -13,16 +13,17 @@ Version 0.1, Hedera Hashgraph
       - [Method-Specific DID URL Parameters](#method-specific-did-url-parameters)
         - [Appnet Address Book](#appnet-address-book)
   - [CRUD Operations](#crud-operations)
-    - [Create](#create)
-    - [Read](#read)
-    - [Update](#update)
-    - [Delete](#delete)
-    - [Appnet Relay Interface for CRUD Operations](#appnet-relay-interface-for-crud-operations)
-      - [Create](#create-1)
-      - [Read](#read-1)
-      - [Update](#update-1)
-      - [Delete](#delete-1)
-      - [Submit](#submit)
+    - [Events](#events)
+      - [DIDOwner](#didowner)
+      - [VerificationMethod](#verificationmethod)
+      - [Verification relationship](#verification-relationship)
+      - [Services](#services)
+    - [Operations](#operations)
+      - [Create](#create)
+      - [Read](#read)
+      - [Update](#update)
+      - [Revoke](#revoke)
+      - [Delete](#delete)
   - [Security Considerations](#security-considerations)
   - [Privacy Considerations](#privacy-considerations)
   - [Reference Implementations](#reference-implementations)
@@ -52,14 +53,10 @@ A DID that uses this method MUST begin with the following prefix: `did:hedera`. 
 ### Namespace Specific Identifier (NSI)
 The `did:hedera` namestring is defined by the following ABNF:
 ```abnf
-hedera-did = "did:hedera:" hedera-specific-idstring ";" hedera-specific-parameters
+hedera-did = "did:hedera:" hedera-specific-idstring "_" hedera-specific-parameters
 hedera-specific-idstring = hedera-network ":" hedera-base58-key
-hedera-specific-parameters = appnet-address-book [";" appnet-did-topic]
-appnet-address-book = "hedera:" hedera-network ":fid=" appnet-address-book-file-id
-
-appnet-did-topic = "hedera:" hedera-network ":tid=" appnet-did-topic-id
-appnet-address-book-file-id = 1*DIGIT "." 1*DIGIT "." 1*DIGIT
-appnet-did-topic-id = 1*DIGIT "." 1*DIGIT "." 1*DIGIT
+hedera-specific-parameters = did-topic-id
+did-topic-id = 1*DIGIT "." 1*DIGIT "." 1*DIGIT
 
 hedera-network = "mainnet" / "testnet"
 hedera-base58-key = 32*44(base58)
@@ -73,34 +70,34 @@ base58 = "1" / "2" / "3" / "4" / "5" / "6" / "7" / "8" / "9" / "A" / "B" /
 
 Example:
 ```
-did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm;hedera:mainnet:fid=0.0.123
+did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm_0.0.12345
 ```
 
-The method specific identifier `hedera-specific-idstring` is composed of a Hedera network identifier with a `:` separator followed by a `hedera-base58-key` identifier which is a base58-encoded SHA-256 hash of a DID root public key and then method specific parameters `fid` and optionally `tid` (see details below). 
+The method specific identifier `hedera-specific-idstring` is composed of a Hedera network identifier with a `:` separator followed by a `hedera-base58-key` identifier which is a base58 Encoded of a DID root public key and a `did-topic-id` (see details below). 
 
-Hedera DIDs are not required to be registered on the ledger and may be used as unregistered pseudonymous pairwise identifiers. However, these identifiers may also be registered on the ledger within a specific appnet and be publicly resolvable or with access restriction defined by business application network owners. 
+Hedera DIDs are not required to be registered on the ledger and may be used as unregistered pseudonymous pairwise identifiers. However, these identifiers may also be registered on the ledger and be publicly resolvable.
 
-Every DID document registered on Hedera network MUST contain a public key of id `#did-root-key` and type `Ed25519VerificationKey2018`. The `hedera-base58-key` identifier is a base58-encoded SHA-256 hash of this public key.
+Every DID document registered on Hedera network MUST contain a public key of id `#did-root-key` and type `Ed25519VerificationKey2018`. The `hedera-base58-key` identifier is a base58 Encoded of this public key.
 
 Example Hedera DID document:
 ```json
 {
   "@context": "https://www.w3.org/ns/did/v1",
-  "id": "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm;hedera:mainnet:fid=0.0.123",
+  "id": "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm_0.0.12345",
   "authentication": [
-    "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm;hedera:mainnet:fid=0.0.123#did-root-key"
+    "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm_0.0.12345#did-root-key"
   ],
-  "publicKey": [
+  "VerificationMethod": [
     {
-      "id": "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm;hedera:mainnet:fid=0.0.123#did-root-key",
+      "id": "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm_0.0.12345#did-root-key",
       "type": "Ed25519VerificationKey2018",
-      "controller": "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm;hedera:mainnet:fid=0.0.123",
-      "publicKeyBase58": "H3C2AVvLMv6gmMNam3uVAjZpfkcJCwDwnZn6z3wXmqPV"
+      "controller": "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm_0.0.12345",
+      "publicKeyMultibase": "H3C2AVvLMv6gmMNam3uVAjZpfkcJCwDwnZn6z3wXmqPV"
     }
   ],
   "service": [
     {
-      "id": "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm;hedera:mainnet:fid=0.0.123#vcs",
+      "id": "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm_0.0.12345#vcs",
       "type": "VerifiableCredentialService",
       "serviceEndpoint": "https://example.com/vc/"
     }
@@ -109,37 +106,17 @@ Example Hedera DID document:
 ```
 
 #### Method-Specific DID URL Parameters
-There are two method-specific parameters defined for a Hedera DID:
-- `fid` - a mandatory parameter that defines the FileID of a the corresponding business application network's address book file. The first step in resolving a DID is to retrieve the address book from the Hedera network, and so determine the addresses of the members of the business application network against which the second step of resolution can be performed. 
-- `tid` - an optional parameter that defines a TopicID of Hedera Consensus Service topic to which a particular DID document was submitted. This can be used in case of open and publicly available DID documents to resolve DIDs without the use of appnet services.
+There is one method-specific parameter defined for a Hedera DID:
+- `did-topic-id` - an mandatory parameter that defines a TopicID of Hedera Consensus Service topic to which a particular DID document was submitted. This allow us to resolve DIDs publicy through Hedera mirror nodes.
 
-A Hedera FileID is a triplet of numbers, e.g. `1.5.34634` represents file number `34634` within realm `5` within shard `1`.
-Hedera TopicID follows a similar format and is defined as a triplet of numbers, e.g. `0.0.21243` represents a topic identifier `21243` within realm `0` within shard `0`.
+A Hedera TopicID is a triplet of numbers, e.g. `0.0.21243` represents a topic identifier `21243` within realm `0` within shard `0`.
 
-Realms allow Solidity smart contracts to run in parallel. Realms are not relevant to this DID Method. In the future, when the number of consensus nodes warrants, the Hedera network will be divided up into shards such that a particular transaction will be processed into consensus only by a subset of the full set of nodes. 
-
-##### Business Application Network Address Book
-Each business application network that utilizes the Hedera DID Method must create and manage an address book file stored in the Hedera File Service. Unlike DID Documents which are persisted in an business application network's state, business application network address books are persisted in the state of the Hedera network nodes on the file service. The Hedera network consequently provides a decentralized and trusted discovery mechanism for business application network address books. The address book file contains URLs of the individual servers that comprise the business application network and that provide CRUD services for the DIDs within this business application network and Topic IDs within Hedera network used for posting DID and verifiable credentials. The address book is a JSON file compatible with a JSON schema defined [here](appnet-address-book.schema.json). 
-
-Example address book file content:
-```json
-{
-	"appnetName": "My Business Application Network",
-	"didTopicId": "0.0.12345",
-	"vcTopicId": "0.0.23456",
-	"appnetDidServers": [
-		"https://example.com/myappnet/hedera/api", 
-		"https://example2.com/myappnet/api/v1", 
-		"https://example3.com/myappnet"
-	]
-}
-```
-Specific authorizations for making change to the address book file for an business application network can be controlled via the list of keys associated with that file. Only transactions signed by the corresponding private keys will be authorized to update or delete the address book. Hedera supports hierarchical key structure to support a flexible authorization model.
+Realms allow Solidity smart contracts to run in parallel. Realms are not relevant to this DID Method. In the future, when the number of consensus nodes warrants, the Hedera network will be divided up into shards such that a particular transaction will be processed into consensus only by a subset of the full set of nodes.
 
 ## CRUD Operations
-Hedera network nodes support a Consensus Service API by which clients submit transaction messages to a topic - these transactions assigned a consensus timestamp and order before flowing back out to mirror nodes and any business application network subscribed to the relevamt topic. Every business application network that implements the Hedera DID method must have a dedicated HCS topic created for DID documents registration. Members of the business application network will subscribe to the corresponding topics, and consesequently retrieve and store valid DID documents submitted to the topic. 
+Hedera network nodes support a Consensus Service API by which clients submit transaction messages to a topic - these transactions assigned a consensus timestamp and order before flowing back out to mirror nodes and any business application network subscribed to the relevant topic. Each DID Owner must have a dedicated HCS topic created for DID documents registration. Relevant business application network will subscribe to the corresponding topics, and consesequently retrieve and store valid DID documents submitted to the topic. 
 
-Create, Update and Delete operations against a DID Document are submitted via the Consensus Service API, either directly by a DID Owner or indirectly by an business application network member on behalf of a DID Owner
+Create, Update and Delete operations against a DID Document are submitted via the Consensus Service API, either directly by a DID Owner.
 
 The two alternatives are:
 ![alt text](./images/create-update-delete.flow.svg "Create, Update and Delete flow alternatives")
@@ -149,16 +126,11 @@ The Read operation happens against either a mirror node or a member of the relev
 The two alternatives are:
 ![alt text](./images/read.flow.svg "Read flow alternatives")
 
-A valid Create, Update, or Delete message must have a JSON structure defined by a [did-message-schema](did-message.schema.json) and contains the following properties:
-- `mode` - Describes the mode in which the message content is provided. Valid values are: `plain` or `encrypted`. Messages in `encrypted` mode have `did` and `didDocumentBase64` attributes encrypted separately. Other attributes are plain.
+A valid Create, Update, Revoke or Delete message must have a JSON structure defined by a [DIDMessage-schema](DIDMessage.schema.json) and contains the following properties:
 - `message` - The message content with the following attributes:
-  - `operation` - DID method operation to be performed on the DID document.  Valid values are: `create`, `update` and `delete`.
-  - `did` -  - This field may contain either: 
-    - a plain DID,
-    - or a Base64-encoded encrypted representation of the DID, where the encryption and decryption methods and keys are defined by appnet owners.
-  - `didDocumentBase64` - This field may contain either: 
-    - a string that represents Base64-encoded DID document that conforms to the [DID Specification](https://w3c.github.io/did-core/),
-    - or a Base64-encoded encrypted representation of Base64-encoded DID document, where the encryption and decryption methods and keys are defined by appnet owners.
+  - `operation` - DID method operation to be performed on the DID document.  Valid values are: `create` , `update` , `revoke` and `delete`.
+  - `did` - a plain DID.
+  - `event` - A Base64-encoded list of events in JSON notation that conforms the different properties of a DID documents to the [DID Specification](https://w3c.github.io/did-core/), the accepted events are listed within this specification
   - `timestamp` - A message creation time. The value MUST be a valid XML datetime value, as defined in section 3.3.7 of [W3C XML Schema Definition Language (XSD) 1.1 Part 2: Datatypes](https://www.w3.org/TR/xmlschema11-2/). This datetime value MUST be normalized to UTC 00:00, as indicated by the trailing "Z". It is important to note that this timestamp is a system timestamp as a variable part of the message and does not represent a consensus timestamp of a message submitted to the DID topic.
 - `signature` - A Base64-encoded signature that is a result of signing a minified JSON string of a message attribute with a private key corresponding to the public key `#did-root-key` in the DID document.
 
@@ -167,11 +139,10 @@ Neither the Hedera network nor mirror nodes validate the DID Documents against t
 Here is an example of a complete message wrapped in an envelope and signed:
 ```json
 {
-  "mode": "plain",
   "message": {
-    "operation": "create",
-    "did": "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm;hedera:mainnet:fid=0.0.123",
-    "didDocumentBase64": "ewogICJAY29udGV...9tL3ZjLyIKICAgIH0KICBdCn0=",
+    "operation": "update",
+    "did": "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm__0.0.12345", 
+    "event": "ewogICJAY29udGV...9tL3ZjLyIKICAgIH0KICBdCn0=",
     "timestamp": "2020-04-23T14:37:43.511Z"
   },
   "signature":  "QNB13Y7Q9...1tzjn4w=="
@@ -180,14 +151,121 @@ Here is an example of a complete message wrapped in an envelope and signed:
 
 It is a responsibility of an business application network's administrators to decide who can submit messages to their DID topic. Access control of message submission is defined by a `submitKey` property of `ConsensusCreateTopicTransaction` body. If no `submitKey` is defined for a topic, then any party can submit messages against the topic. Detailed information on Hedera Consensus Service APIs can be found in the official [Hedera API documentation](https://docs.hedera.com/hedera-api/consensus/consensusservice).
 
-### Create
-A DID document is created within a particular business application network by sending a `ConsensusSubmitMessage` transaction to a Hedera network node. It is executed by sending a `submitMessage` RPC call to the HCS API with the `ConsensusSubmitMessageTransactionBody` containing:
+### Events
+
+#### DIDOwner
+
+Each identifier always has a controller address. By default, it is the same as the identifier address, however the resolver must validate this against the DID document. This controller address must be represented in the DID document as a verificationMethod entry with the id set as the DID being resolved and with the fragment `#did-root-key` appended to it. A reference to it must also be added to the authentication and assertionMethod arrays of the DID document.
+
+If the controller for a particular DID is changed, a DIDOwner event is emitted through an DID update Message.
+The event data MUST be used to update the `#did-root-key` entry in the verificationMethod array.
+
+DIDOwner event must have a JSON structure defined by a [DIDOwner-schema](DIDOwner.schema.json) and contains the following properties:
+- `DIDOwner` - The DIDOwner event with the following attributes:
+  - `id` - The Id property of the verification method.
+  - `type` - reference to the verification method type.
+  - `controller` - The DID of the entity that is authorized to make the change.
+  - `publickeyMultibase` - Mutlibase encoded public key.
+
+```json
+{
+  "DIDOwner": {
+    "id": "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm__0.0.12345",
+    "type": "Ed25519VerificationKey2018", 
+    "controller": "did:hedera:mainnet:a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
+    "publicKeyMultibase": "H3C2AVvLMv6gmMNam3uVAjZpfkcJCwDwnZn6z3wXmqPV",
+  },
+}
+```
+
+#### VerificationMethod
+
+The DID specification offers the possiblity to add multiple verfication methods associated with a DID via a DID Documents. These verifications methods can represent:
+* A parent who controls a child's DID document might permit the child to use their personal device in order to authenticate (DID Delegate).
+* Linking certain verification methods to specific verification purposes.
+
+VerificationMethod event must have a JSON structure defined by a [VerificationMethod-schema](VerificationMethod.schema.json) and contains the following properties:
+- `VerificationMethod` - The VerificationMethod event with the following attributes:
+  - `id` - The Id property of the verification method.
+  - `type` - reference to the verification method type.
+  - `controller` - The DID of the entity that is authorized to make the change.
+  - `publickeyMultibase` - Mutlibase encoded public key.
+
+```json
+{
+  "VerificationMethod": {
+    "id":"did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm_0.0.12345#delegate-key1",
+    "type": "Ed25519VerificationKey2018", 
+    "controller": "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm__0.0.12345",
+    "publicKeyMultibase": "H3C2AVvLMv6gmMNam3uVAjZpfkcJCwDwnZn6z3wXmqPV",
+  },
+}
+```
+
+#### Verification relationship
+
+The verification relationship event enable the associated verification methods to be used for different purposes.he The event offers support for :
+* Authentication verification relationship is used to specify how the DID subject is expected to be authenticated, for purposes such as logging into a website or engaging in any sort of challenge-response protocol. 
+* Assertion verification relationship allows verifier to check if a verifiable credential contains a proof created by the DID subject.
+* The keyAgreement verification relationship allows the DID subject to specify how an entity can generate encryption material in order to transmit confidential information, such as for the purposes of establishing a secure communication channel with the recipient. 
+* Capability Invocation relationship allows the DID subject to invoke a cryptographic capability for a specific authorisation.
+* Capability Delegation relationship is used to specify a mechanism that might be used by the DID subject to delegate a cryptographic capability to another party, such as delegating the authority to access a specific HTTP API to a subordinate. 
+
+VerificationRelationship event must have a JSON structure defined by a [VerificationRelationship-schema](VerificationRelationship.schema.json) and contains the following properties:
+- `VerificationRelationship` - The VerificationRelationship event with the following attributes:
+  - `id` - The Id property of the verification method.
+   - `relationshipType` - Relationship type that is linked to specific verification method. to be performed on the DID document.  Valid values are: `authentication` , `assertionMethod` , `keyAgreement` , `capabilityInvocation` and `capabilityDelegation`.
+  - `type` - reference to the verification method type.
+  - `controller` - The DID of the entity that is authorized to make the change.
+  - `publickeyMultibase` - Mutlibase encoded public key.
+
+```json
+{
+  "VerificationRelationship": {
+    "id":"did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm_0.0.12345#delegate-key1",
+    "relationshipType": "authentication",
+    "type": "Ed25519VerificationKey2018", 
+    "controller": "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm__0.0.12345",
+    "publicKeyMultibase": "H3C2AVvLMv6gmMNam3uVAjZpfkcJCwDwnZn6z3wXmqPV",
+  },
+}
+```
+
+#### Services
+
+Services are used in DID documents to express ways of communicating with the DID subject or associated entities. A service can be any type of service the DID subject wants to advertise, including decentralized identity management services for further discovery, authentication, authorization, or interaction. 
+
+Service event must have a JSON structure defined by a [service-schema](Service.schema.json) and contains the following properties:
+- `Service` - The Service event with the following attributes:
+  - `id` - The Id property of the service.
+  - `type` - reference to the service type.
+  - `serviceEndpoint` - valid urn to the service endpoint.
+
+
+
+```json
+{
+  "Service":
+    {
+      "id": "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm_0.0.12345#vcs",
+      "type": "VerifiableCredentialService",
+      "serviceEndpoint": "https://example.com/vc/"
+    },
+}
+```
+
+
+### Operations
+
+#### Create
+A DID Document is created implicit, by having hedera account, or via a transaction within a particular business application network by sending a `ConsensusSubmitMessage` transaction to a Hedera network node. 
+It is executed by sending a `submitMessage` RPC call to the HCS API with the `ConsensusSubmitMessageTransactionBody` containing:
 - `topicID` - equal to the ID of appnet's DID topic
 - `message` - a JSON DID message envelope described above with `operation` set to `create`
 
 Business application network members subscribed to this DID topic shall store the DID document in their local storage upon receiving this message from a mirror.
 
-### Read
+#### Read
 Read, or DID resolution, does not occur via HCS messages but rather directly against a computer that has persisted the DID Document.
 
 How resolution of a DID into the corresponding DID Document occurs depends on whether the DID Document was submitted in encrypted or plaintext mode and, where resolution happens.
@@ -214,269 +292,31 @@ If resolved against an business application network member, resolution requires 
 If the DID Document were submitted in encrypted mode, then resolution against a mirror is not possible unless the verifier is in possession of a decryption key and the business application network service is the only way of resolution.
 
 
-### Update
-A DID document is updated within the business application network by sending a `ConsensusSubmitMessage` transaction to a Hedera network node. It is executed by sending a `submitMessage` RPC call to HCS with the `ConsensusSubmitMessageTransactionBody` containing:
+#### Update
+A property or a DID document is updated by sending a `ConsensusSubmitMessage` transaction to a Hedera network node. It is executed by sending a `submitMessage` RPC call to HCS with the `ConsensusSubmitMessageTransactionBody` containing:
 - `topicID` - equal to the ID of the appropriate appnet's DID topic
 - `message` - a JSON DID message envelope described above with `operation` set to `update`
 
 Business application network members subscribed to this DID topic shall replace the previous version of the DID document from their storage with this new version upon receiving this message from a mirror.
 
 
-### Delete 
-A DID document is deleted within the business application network by sending a `ConsensusSubmitMessage` transaction to a Hedera network node. It is executed by sending a `submitMessage` RPC call to HCS with the `ConsensusSubmitMessageTransactionBody` containing:
+#### Revoke 
+A property or a DID document is revoked by sending `ConsensusSubmitMessage` transaction to a Hedera network node. It is executed by sending a `submitMessage` RPC call to HCS with the `ConsensusSubmitMessageTransactionBody` containing:
+- `topicID` - equal to the ID of appnet's DID topic
+- `message` - a JSON DID message envelope described above with `operation` set to `revoke` 
+Business application network members subscribed to this DID topic shall delete the DID document from their storage or mark it as deleted upon receiving this message from a mirror.
+
+
+
+#### Delete 
+A Whole DID document is deleted/nullified by sending `ConsensusSubmitMessage` transaction to a Hedera network node. It is executed by sending a `submitMessage` RPC call to HCS with the `ConsensusSubmitMessageTransactionBody` containing:
 - `topicID` - equal to the ID of appnet's DID topic
 - `message` - a JSON DID message envelope described above with `operation` set to `delete`
 
-Business application network members subscribed to this DID topic shall delete the DID document from their storage or mark it as deleted upon receiving this message from a mirror.
-
-### Appnet Relay Interface for CRUD Operations
-
-DID Controllers, who have their own accounts on the Hedera network and are authorized to submit messages to an business application network's DID topic can send Create, Update, and Delete HCS transactions directly to a Hedera network node. Alternatively, DID Controllers can use an business application network's relay interface that will send the HCS messages for them. The access to an business application network's CRUD relay interface is defined by each business application network owner, so authentication and authorization mechanisms are out of scope. This specification only defines a common REST API interface for each CRUD operation. The interface path is relative to the service URLs defined in the business application network's address book file.
-
-The mode in which the messages are submitted into the DID topic is defined by the business application network and in case of encryption, it is the business application network that controls encryption and decryption keys. Due to that, submission of create, update or delete messages is executed in two steps:
-1. Message preparation
-   - DID subject sends Create/Update/Delete request to the business application network with a DID document as request body
-   - Business application network member prepares a message envelope taking care of encoding DID document, setting encryption mode and operation type
-   - Business application network member responds with a message envelope without signature.
-2. Message signing and submission
-   - DID subject takes appnet's response envelope and signs the `message` content with their `#did-root-key`
-   - DID subject sends Submit request to the appnet with the signed message envelope as request body.
-
-All API operations shall have the same error response content as the following example:
-```json
-{
-  "error" : {
-    "code" : 404,
-    "message" : "You are unauthorized to make this request."
-  }
-}
-```
-
-#### Create
-Requests that a new DID document be created on the business application network network.
-
-The DID Document is not considered to have been created until the DID Document was submitted to the HCS, received a consensus timestamp and order, been retrieved by the members of the appropriate appnet, and persisted in the business application network state.
-
-The consensus timestamp assigned the Create message shall be interpreted as the time at which the DID Document was created, and used as the value of the 'created' property when the DID is subsequently resolved into the DID Document. 
-
-The mode in which the DID document is submitted (plain or encrypted) is defined on the business application network level and shall be transparent to the API users.
-
-- __URL:__ `/did/`
-- __Method:__ `POST`
-- __Content Type:__ `application/json`
-- __URL Parameters:__ *None*
-- __Request Body:__ A DID document, e.g.:
-```json
-{
-  "@context": "https://www.w3.org/ns/did/v1",
-  "id": "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm;hedera:mainnet:fid=0.0.123",
-  "authentication": [
-    "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm;hedera:mainnet:fid=0.0.123#did-root-key"
-  ],
-  "publicKey": [
-    {
-      "id": "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm;hedera:mainnet:fid=0.0.123#did-root-key",
-      "type": "Ed25519VerificationKey2018",
-      "controller": "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm;hedera:mainnet:fid=0.0.123",
-      "publicKeyBase58": "H3C2AVvLMv6gmMNam3uVAjZpfkcJCwDwnZn6z3wXmqPV"
-    }
-  ],
-}
-```
-- __Success Response:__
-  - __Code:__ `200 OK`
-  - __Response Body:__ Unsigned message envelope, e.g.:
-```json
-{
-  "mode": "plain",
-  "message": {
-    "operation": "create",
-    "did": "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm;hedera:mainnet:fid=0.0.123",
-    "didDocumentBase64": "ewogICJAY29udGV...9tL3ZjLyIKICAgIH0KICBdCn0=",
-    "timestamp": "2020-04-23T14:37:43.511Z"
-  }
-}
-```
-- __Error Response:__
-  - __Code:__ `401 UNAUTHORIZED`
-  - __Code:__ `500 INTERNAL SERVER ERROR`
-
-#### Read
-Resolves a given DID into the corresponding full DID document.
-
-The business application network shall inject the consensus timestamps of the first CREATE message and the latest UPDATE message into the corresponding `created` and `updated` properties of the returned DID document. In the future this specification may include an extension of a DID document with Hedera-specific contexts and attributes (e.g. state proofs).
-
-- __URL:__ `/did/`
-- __Method:__ `GET`
-- __Content Type:__ `application/json`
-- __URL Parameters:__ *None*
-- __Request Body:__
-```json
-{
-  "did": "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm;hedera:mainnet:fid=0.0.123",
-}
-```
-- __Success Response:__
-  - __Code:__ `200 OK`
-  - __Response Body:__
-The latest version of DID document in a plain form, e.g.:
-```json
-{
-  "@context": "https://www.w3.org/ns/did/v1",
-  "id": "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm;hedera:mainnet:fid=0.0.123",
-  "created": "2020-04-21T17:34:00Z",
-  "authentication": [
-    "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm;hedera:mainnet:fid=0.0.123#did-root-key"
-  ],
-  "publicKey": [
-    {
-      "id": "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm;hedera:mainnet:fid=0.0.123#did-root-key",
-      "type": "Ed25519VerificationKey2018",
-      "controller": "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm;hedera:mainnet:fid=0.0.123",
-      "publicKeyBase58": "H3C2AVvLMv6gmMNam3uVAjZpfkcJCwDwnZn6z3wXmqPV"
-    }
-  ],
-  "service": [
-    {
-      "id": "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm;hedera:mainnet:fid=0.0.123#vcs",
-      "type": "VerifiableCredentialService",
-      "serviceEndpoint": "https://example.com/vc/"
-    }
-  ]
-}
-```
-
-- __Error Response:__
-  - __Code:__ `401 UNAUTHORIZED`
-  - __Code:__ `404 NOT FOUND`
-  - __Code:__ `500 INTERNAL SERVER ERROR`
-
-#### Update
-Requests that the DID document be updated on the business application network network.
-
-The DID Document is not considered to have been updated until the DID Document was submitted to the HCS, received a consensus timestamp and order , been retrieved by the members of the appropriate business application network, and persisted in the appnet state.
-
-The consensus timestamp assigned the Update message shall be interpreted as the time at which the DID Document was updated, and used as the value of the 'updated' property when the DID is subsequently resolved into the DID Document. 
-
-- __URL:__ `/did/`
-- __Method:__ `PUT`
-- __Content Type:__ `application/json`
-- __URL Parameters:__ *None*
-- __Request Body:__ A DID document, e.g.:
-```json
-{
-  "@context": "https://www.w3.org/ns/did/v1",
-  "id": "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm;hedera:mainnet:fid=0.0.123",
-  "authentication": [
-    "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm;hedera:mainnet:fid=0.0.123#did-root-key"
-  ],
-  "publicKey": [
-    {
-      "id": "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm;hedera:mainnet:fid=0.0.123#did-root-key",
-      "type": "Ed25519VerificationKey2018",
-      "controller": "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm;hedera:mainnet:fid=0.0.123",
-      "publicKeyBase58": "H3C2AVvLMv6gmMNam3uVAjZpfkcJCwDwnZn6z3wXmqPV"
-    }
-  ],
-}
-```
-- __Success Response:__
-  - __Code:__ `200 OK`
-  - __Response Body:__ Unsigned message envelope, e.g.:
-```json
-{
-  "mode": "plain",
-  "message": {
-    "operation": "update",
-    "did": "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm;hedera:mainnet:fid=0.0.123",
-    "didDocumentBase64": "ewogICJAY29udGV...9tL3ZjLyIKICAgIH0KICBdCn0=",
-    "timestamp": "2020-04-23T14:37:43.511Z"
-  }
-}
-```
-- __Error Response:__
-  - __Code:__ `401 UNAUTHORIZED`
-  - __Code:__ `404 NOT FOUND`
-  - __Code:__ `500 INTERNAL SERVER ERROR`
-
-#### Delete 
-Requests that a given DID Document be deleted or revoked from the business application network network. The DID document submitted here should have at least `authentication` part empty, so that any subsequent DID ownership verification will fail.
-
-The DID Document is not considered to have been deleted until the DID Document was submitted to the HCS, received a consensus timestamp and order, been retrieved by the members of the appropriate appnet, and persisted in the business application network state.
-
-Depending on an business application network's storage implementation the DID document may be completely removed or instead only marked as deleted.
-
-- __URL:__ `/did/`
-- __Method:__ `DELETE`
-- __Content Type:__ `application/json`
-- __URL Parameters:__ *None*
-- __Request Body:__ A DID document, e.g.:
-```json
-{
-  "@context": "https://www.w3.org/ns/did/v1",
-  "id": "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm;hedera:mainnet:fid=0.0.123",
-  "authentication": [
-    "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm;hedera:mainnet:fid=0.0.123#did-root-key"
-  ],
-  "publicKey": [
-    {
-      "id": "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm;hedera:mainnet:fid=0.0.123#did-root-key",
-      "type": "Ed25519VerificationKey2018",
-      "controller": "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm;hedera:mainnet:fid=0.0.123",
-      "publicKeyBase58": "H3C2AVvLMv6gmMNam3uVAjZpfkcJCwDwnZn6z3wXmqPV"
-    }
-  ],
-}
-```
-- __Success Response:__
-  - __Code:__ `200 OK`
-  - __Response Body:__ Unsigned message envelope, e.g.:
-```json
-{
-  "mode": "plain",
-  "message": {
-    "operation": "delete",
-    "did": "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm;hedera:mainnet:fid=0.0.123",
-    "didDocumentBase64": "ewogICJAY29udGV...9tL3ZjLyIKICAgIH0KICBdCn0=",
-    "timestamp": "2020-04-23T14:37:43.511Z"
-  }
-}
-```
-- __Error Response:__
-  - __Code:__ `401 UNAUTHORIZED`
-  - __Code:__ `404 NOT FOUND`
-  - __Code:__ `500 INTERNAL SERVER ERROR`
-
-
-#### Submit
-Requests that a given operation on DID document be submitted to the DID topic of Hedera network.
-
-- __URL:__ `/did-submit`
-- __Method:__ `POST`
-- __Content Type:__ `application/json`
-- __URL Parameters:__ *None*
-- __Request Body:__ A message envelope prepared by the appnet in Create, Update or Delete request and signed by DID subject with their  `#did-root-key`, e.g.:
-```json
-{
-  "mode": "plain",
-  "message": {
-    "operation": "create",
-    "did": "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm;hedera:mainnet:fid=0.0.123",
-    "didDocumentBase64": "ewogICJAY29udGV...9tL3ZjLyIKICAgIH0KICBdCn0=",
-    "timestamp": "2020-04-23T14:37:43.511Z"
-  },
-  "signature":  "QNB13Y7Q9...1tzjn4w=="
-}
-```
-- __Success Response:__
-  - __Code:__ `202 ACCEPTED`
-- __Error Response:__
-  - __Code:__ `401 UNAUTHORIZED`
-  - __Code:__ `500 INTERNAL SERVER ERROR`
 
 ## Security Considerations
 
-Security of Hedera DID Documents inherits the security properties of Hedera Hashgraph network itself and specific implementation of business application networks that persist the DID Documents.
+Security of Hedera DID Documents inherits the security properties of Hedera Hashgraph network itself.
 
 Hedera Hashgraph uses the hashgraph algorithm for the consensus timestamping and ordering of transactions. Hashgraph is Asynchronous Byzantine Fault Tolerant (ABFT) and fair, in that no particular node has the sole authority to decide the order of transactions, even if only for a short period of time. 
 
@@ -490,9 +330,7 @@ The messages are persisted only on mirror nodes, and appnet members that are sub
 
 Mirrors may persist HCS messages and are presumed to be public. Consequently, any data sent via HCS messages should be encrypted if sensitive. 
 
-A public DID Document can be sent unencrypted. Public DIDs/DID Documents include public keys and service endpoints
-
-If it be undesirable that a DID Document be public, it can be encrypted such that only members of an business application network can read it, or even specific members of the business application network. HCS supports perfect forward secrecy through key rotation to mitigate the risk of encrypted DID Documents persisted on mirrors being decrypted. 
+A public DID Document is sent unencrypted. Public DIDs/DID Documents include public keys and service endpoints
 
 Write access to Hedera Consensus Service DID Topics can be controlled by stipulating a list of public keys for the topic by business application network administrators. Only HCS messages signed by the corresponding private keys will be accepted. A key can be a "threshold key", which means a list of M keys, any N of which must sign in order for the threshold signature to be considered valid. The keys within a threshold signature may themselves be threshold signatures, to allow complex signature requirements. 
 
