@@ -126,7 +126,7 @@ The Read operation happens against either a mirror node or a member of the relev
 The two alternatives are:
 ![alt text](./images/read.flow.svg "Read flow alternatives")
 
-A valid Create, Update, Revoke or Delete message must have a JSON structure defined by a [did-message-schema](did-message.schema.json) and contains the following properties:
+A valid Create, Update, Revoke or Delete message must have a JSON structure defined by a [DIDMessage-schema](DIDMessage.schema.json) and contains the following properties:
 - `message` - The message content with the following attributes:
   - `operation` - DID method operation to be performed on the DID document.  Valid values are: `create` , `update` , `revoke` and `delete`.
   - `did` - a plain DID.
@@ -160,7 +160,7 @@ Each identifier always has a controller address. By default, it is the same as t
 If the controller for a particular DID is changed, a DIDOwner event is emitted through an DID update Message.
 The event data MUST be used to update the `#did-root-key` entry in the verificationMethod array.
 
-DIDOwner event must have a JSON structure defined by a [did-message-schema](did-message.schema.json) and contains the following properties:
+DIDOwner event must have a JSON structure defined by a [DIDOwner-schema](DIDOwner.schema.json) and contains the following properties:
 - `DIDOwner` - The DIDOwner event with the following attributes:
   - `id` - The Id property of the verification method.
   - `type` - reference to the verification method type.
@@ -184,7 +184,7 @@ The DID specification offers the possiblity to add multiple verfication methods 
 * A parent who controls a child's DID document might permit the child to use their personal device in order to authenticate (DID Delegate).
 * Linking certain verification methods to specific verification purposes.
 
-VerificationMethod event must have a JSON structure defined by a [did-message-schema](did-message.schema.json) and contains the following properties:
+VerificationMethod event must have a JSON structure defined by a [VerificationMethod-schema](VerificationMethod.schema.json) and contains the following properties:
 - `VerificationMethod` - The VerificationMethod event with the following attributes:
   - `id` - The Id property of the verification method.
   - `type` - reference to the verification method type.
@@ -211,7 +211,7 @@ The verification relationship event enable the associated verification methods t
 * Capability Invocation relationship allows the DID subject to invoke a cryptographic capability for a specific authorisation.
 * Capability Delegation relationship is used to specify a mechanism that might be used by the DID subject to delegate a cryptographic capability to another party, such as delegating the authority to access a specific HTTP API to a subordinate. 
 
-VerificationRelationship event must have a JSON structure defined by a [did-message-schema](did-message.schema.json) and contains the following properties:
+VerificationRelationship event must have a JSON structure defined by a [VerificationRelationship-schema](VerificationRelationship.schema.json) and contains the following properties:
 - `VerificationRelationship` - The VerificationRelationship event with the following attributes:
   - `id` - The Id property of the verification method.
    - `relationshipType` - Relationship type that is linked to specific verification method. to be performed on the DID document.  Valid values are: `authentication` , `assertionMethod` , `keyAgreement` , `capabilityInvocation` and `capabilityDelegation`.
@@ -235,7 +235,7 @@ VerificationRelationship event must have a JSON structure defined by a [did-mess
 
 Services are used in DID documents to express ways of communicating with the DID subject or associated entities. A service can be any type of service the DID subject wants to advertise, including decentralized identity management services for further discovery, authentication, authorization, or interaction. 
 
-Service event must have a JSON structure defined by a [did-message-schema](did-message.schema.json) and contains the following properties:
+Service event must have a JSON structure defined by a [service-schema](Service.schema.json) and contains the following properties:
 - `Service` - The Service event with the following attributes:
   - `id` - The Id property of the service.
   - `type` - reference to the service type.
