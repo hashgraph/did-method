@@ -3,11 +3,17 @@
     "type": "object",
     "title": "VerificationRelationship Schema",
     "properties": {
-        "id": { "type": "string" },
-        "relationshipType": { "type": "string" },
-        "type": { "type": "string" },
-        "controller": { "type": "string" },
-        "publicKeyMultibase": { "type": "string" }
+        "VerificationRelationship": {
+            "type": "object",
+            "properties": {
+                "id": { "type": "string" },
+                "relationshipType": { "type": "string" },
+                "type": { "type": "string" },
+                "controller": { "type": "string" },
+                "publicKeyMultibase": { "type": "string" }
+            },
+            "required": ["id", "relationshipType", "type", "controller", "publicKeyMultibase"]
+        }
     },
-    "required": ["id", "relationshipType", "type", "controller", "publicKeyMultibase"]
+    "required": ["VerificationRelationship"]
 }
