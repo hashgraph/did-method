@@ -3,9 +3,15 @@
     "type": "object",
     "title": "Service Schema",
     "properties": {
-        "id": { "type": "string" },
-        "type": { "type": "string" },
-        "serviceEndpoint": { "type": "string" }
+        "Service": {
+            "type": "object",
+            "properties": {
+                "id": { "type": "string" },
+                "type": { "type": "string" },
+                "serviceEndpoint": { "type": "string" }
+            },
+            "required": ["id", "type", "serviceEndpoint"]
+        }
     },
-    "required": ["id", "type", "serviceEndpoint"]
+    "required": ["Service"]
 }

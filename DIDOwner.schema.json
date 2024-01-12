@@ -3,10 +3,16 @@
     "type": "object",
     "title": "DIDOwner Schema",
     "properties": {
-        "id": { "type": "string" },
-        "type": { "type": "string" },
-        "controller": { "type": "string" },
-        "publicKeyMultibase": { "type": "string" }
+        "DIDOwner": {
+            "type": "object",
+            "properties": {
+                "id": { "type": "string" },
+                "type": { "type": "string" },
+                "controller": { "type": "string" },
+                "publicKeyMultibase": { "type": "string" }
+            },
+            "required": ["id", "type", "controller", "publicKeyMultibase"]
+        }
     },
-    "required": ["id", "type", "controller", "publicKeyMultibase"]
+    "required": ["DIDOwner"]
 }
