@@ -161,7 +161,7 @@ Here is an example of a complete message wrapped in an envelope and signed:
 {
   "message": {
     "operation": "update",
-    "did": "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm__0.0.12345", 
+    "did": "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm_0.0.12345", 
     "event": "ewogICJAY29udGV...9tL3ZjLyIKICAgIH0KICBdCn0=",
     "timestamp": "2020-04-23T14:37:43.511Z"
   },
@@ -190,7 +190,7 @@ Read, or Resolve, occurs by reading messages from the HCS topic set in the `did-
 2. If the most recent valid message has `operation` set to `create`, and event object is `DIDDocument`, the DID document returned is the document resolve from the IPFS CID reference.
 3. Otherwise
    1. Read valid message until one has `operation` set to `create`, and event object is `DIDOwner`.
-   2. Construct DID document by applying message `update` and `revoke` op[erations in order.
+   2. Construct DID document by applying message `update` and `revoke` operations in order.
    3. Return constructed DID document.
 
 ### 3.1.3. Update
@@ -202,7 +202,7 @@ A property or a DID document is updated by sending a `ConsensusSubmitMessage` tr
   - `operation` set to `update`
   - `event` payload either a `Service`, `VerificationMethod` or `VerificationRelationship` object
 
-### 3.1.4. Revoke 
+### 3.1.4. Revoke
 
 A property or a DID document is updated by sending a `ConsensusSubmitMessage` transaction to a Hedera network node. It is executed by sending a `submitMessage` RPC call to HCS with the `ConsensusSubmitMessageTransactionBody` containing:
 
@@ -211,7 +211,7 @@ A property or a DID document is updated by sending a `ConsensusSubmitMessage` tr
   - `operation` set to `revoke`
   - `event` payload either a `Service`, `VerificationMethod` or `VerificationRelationship` object with `id` set to the property to remove.
 
-### 3.1.5. Delete 
+### 3.1.5. Delete
 
 A Whole DID document is deleted/nullified by sending `ConsensusSubmitMessage` transaction to a Hedera network node. It is executed by sending a `submitMessage` RPC call to HCS with the `ConsensusSubmitMessageTransactionBody` containing:
 
@@ -229,6 +229,7 @@ A Base64-encoded JSON object that conforms the different properties of a DID doc
 A Hedera DID MAY be created by creating a reference to a DID document available in [IPFS](https://ipfs.io/).
 
 `DIDDocument` event value must have a JSON structure defined by a [DIDDocument-schema](DIDDocument.schema.json) and contains the following properties:
+
 - `DIDDocument` - The DIDOwner event with the following attributes:
   - `id` - The DID id
   - `type` - The document type, MAY include the DID document serialisation representation.
@@ -253,6 +254,7 @@ Each identifier always has a controller address. By default, it is the same as t
 If the controller for a particular DID is changed, a `DIDOwner` event is emitted through an DID update message. The event data MUST be used to update the `#did-root-key` entry in the verificationMethod array.
 
 `DIDOwner` event must have a JSON structure defined by a [DIDOwner-schema](DIDOwner.schema.json) and contains the following properties:
+
 - `DIDOwner` - The DIDOwner event with the following attributes:
   - `id` - The Id property of the verification method.
   - `type` - reference to the verification method type.
@@ -262,7 +264,7 @@ If the controller for a particular DID is changed, a `DIDOwner` event is emitted
 ```json
 {
   "DIDOwner": {
-    "id": "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm__0.0.12345",
+    "id": "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm_0.0.12345",
     "type": "Ed25519VerificationKey2018", 
     "controller": "did:hedera:mainnet:a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
     "publicKeyMultibase": "H3C2AVvLMv6gmMNam3uVAjZpfkcJCwDwnZn6z3wXmqPV",
@@ -275,6 +277,7 @@ If the controller for a particular DID is changed, a `DIDOwner` event is emitted
 A DID document can express verification methods, such as cryptographic public keys, which can be used to authenticate or authorize interactions with the DID subject or associated parties.
 
 VerificationMethod event must have a JSON structure defined by a [VerificationMethod-schema](VerificationMethod.schema.json) and contains the following properties:
+
 - `VerificationMethod` - The VerificationMethod event with the following attributes:
   - `id` - The Id property of the verification method.
   - `type` - reference to the verification method type.
@@ -286,7 +289,7 @@ VerificationMethod event must have a JSON structure defined by a [VerificationMe
   "VerificationMethod": {
     "id":"did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm_0.0.12345#delegate-key1",
     "type": "Ed25519VerificationKey2018", 
-    "controller": "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm__0.0.12345",
+    "controller": "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm_0.0.12345",
     "publicKeyMultibase": "H3C2AVvLMv6gmMNam3uVAjZpfkcJCwDwnZn6z3wXmqPV",
   },
 }
@@ -300,17 +303,18 @@ Different verification relationships enable the associated verification methods 
 
 - `authentication` verification relationship is used to specify how the DID subject is expected to be authenticated, for purposes such as logging into a website or engaging in any sort of challenge-response protocol. 
 - `assertionMethod` verification relationship allows verifier to check if a verifiable credential contains a proof created by the DID subject.
-- `keyAgreement` verification relationship allows the DID subject to specify how an entity can generate encryption material in order to transmit confidential information, such as for the purposes of establishing a secure communication channel with the recipient. 
+- `keyAgreement` verification relationship allows the DID subject to specify how an entity can generate encryption material in order to transmit confidential information, such as for the purposes of establishing a secure communication channel with the recipient.
 - `capabilityInvocation` verification relationship allows the DID subject to invoke a cryptographic capability for a specific authorisation.
-- `capabilityDelegation` verification relationship is used to specify a mechanism that might be used by the DID subject to delegate a cryptographic capability to another party, such as delegating the authority to access a specific HTTP API to a subordinate. 
+- `capabilityDelegation` verification relationship is used to specify a mechanism that might be used by the DID subject to delegate a cryptographic capability to another party, such as delegating the authority to access a specific HTTP API to a subordinate.
 
 `VerificationRelationship` event must have a JSON structure defined by a [VerificationRelationship-schema](VerificationRelationship.schema.json) and contains the following properties:
+
 - `VerificationRelationship` - The VerificationRelationship event with the following attributes:
   - `id` - The Id property of the verification method.
-   - `relationshipType` - Relationship type that is linked to specific verification method. to be performed on the DID document.  Valid values are: `authentication` , `assertionMethod` , `keyAgreement` , `capabilityInvocation` and `capabilityDelegation`.
+  - `relationshipType` - Relationship type that is linked to specific verification method. to be performed on the DID document.  Valid values are: `authentication` , `assertionMethod` , `keyAgreement` , `capabilityInvocation` and `capabilityDelegation`.
   - `type` - reference to the verification method type.
   - `controller` - The DID of the entity that is authorized to make the change.
-  - `publickeyMultibase` - Mutlibase encoded public key.
+  - `publickeyMultibase` - Multibase encoded public key.
 
 ```json
 {
@@ -318,7 +322,7 @@ Different verification relationships enable the associated verification methods 
     "id":"did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm_0.0.12345#delegate-key1",
     "relationshipType": "authentication",
     "type": "Ed25519VerificationKey2018", 
-    "controller": "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm__0.0.12345",
+    "controller": "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm_0.0.12345",
     "publicKeyMultibase": "H3C2AVvLMv6gmMNam3uVAjZpfkcJCwDwnZn6z3wXmqPV",
   },
 }
@@ -326,9 +330,10 @@ Different verification relationships enable the associated verification methods 
 
 ### 3.2.5. Services
 
-Services are used in DID documents to express ways of communicating with the DID subject or associated entities. A service can be any type of service the DID subject wants to advertise, including decentralized identity management services for further discovery, authentication, authorization, or interaction. 
+Services are used in DID documents to express ways of communicating with the DID subject or associated entities. A service can be any type of service the DID subject wants to advertise, including decentralized identity management services for further discovery, authentication, authorization, or interaction.
 
 Service event must have a JSON structure defined by a [service-schema](Service.schema.json) and contains the following properties:
+
 - `Service` - The Service event with the following attributes:
   - `id` - The Id property of the service.
   - `type` - reference to the service type.
@@ -349,9 +354,9 @@ Service event must have a JSON structure defined by a [service-schema](Service.s
 
 Security of Hedera DID Documents inherits the security properties of Hedera Hashgraph network itself.
 
-Hedera Hashgraph uses the hashgraph algorithm for the consensus timestamping and ordering of transactions. Hashgraph is Asynchronous Byzantine Fault Tolerant (ABFT) and fair, in that no particular node has the sole authority to decide the order of transactions, even if only for a short period of time. 
+Hedera Hashgraph uses the hashgraph algorithm for the consensus timestamping and ordering of transactions. Hashgraph is Asynchronous Byzantine Fault Tolerant (ABFT) and fair, in that no particular node has the sole authority to decide the order of transactions, even if only for a short period of time.
 
-Hedera uses a proof of stake (POS) model to mitigate Sybil attacks. The influence of a particular node towards consensus is weighted by the amount of hbars, the network's native coin, they control.
+Hedera uses a proof of stake (POS) model to mitigate Sybil attacks. The influence of a particular node towards consensus is weighted by the amount of HBARs, the network's native coin, they control.
 
 Hedera charges fees for the processing of transactions into consensus and to partially mitigate Denial of Service attacks.
 
@@ -361,7 +366,7 @@ The messages are persisted only on mirror nodes, and appnet members that are sub
 
 A public DID Document is sent unencrypted. Public DIDs/DID Documents include public keys and service endpoints.
 
-Write access to Hedera Consensus Service DID Topics can be controlled by stipulating a list of public keys for the topic by the DID Controller. Only HCS messages signed by the corresponding private keys will be accepted. A key can be a "threshold key", which means a list of M keys, any N of which must sign in order for the threshold signature to be considered valid. The keys within a threshold signature may themselves be threshold signatures, to allow complex signature requirements. 
+Write access to Hedera Consensus Service DID Topics can be controlled by stipulating a list of public keys for the topic by the DID Controller. Only HCS messages signed by the corresponding private keys will be accepted. A key can be a "threshold key", which means a list of M keys, any N of which must sign in order for the threshold signature to be considered valid. The keys within a threshold signature may themselves be threshold signatures, to allow complex signature requirements.
 
 # 5. Privacy Considerations
 
@@ -369,17 +374,18 @@ A DID Document should not include Personally Identifiable Information (PII).
 
 The identifiers used to identify a subject create a greater risk of correlation when those identifiers are long-lived or used across more than one application domain as those domains could use that shared handle for the subject to share information about that subject without their express consent.
 
-The resolution process may leak PII as the resolver can infer that the Subject presenting the DID is interacting with the verifier resolving the DID. 
+The resolution process may leak PII as the resolver can infer that the Subject presenting the DID is interacting with the verifier resolving the DID.
 
-If DID Controllers want to mitigate the risk of correlation, they should use unique DIDs for every interaction and the corresponding DID Documents should contain a unique public key. 
+If DID Controllers want to mitigate the risk of correlation, they should use unique DIDs for every interaction and the corresponding DID Documents should contain a unique public key.
 
 # 6. Reference Implementations
 
 The code at [hashgraph/did-sdk-js](https://github.com/hashgraph/did-sdk-js) is intended to provide a JavaScript SDK for this DID method specification. A set of unit tests and example script commands within this repository present a reference implementation of this DID method.
 
 # 7. References
+
 - [DID Primer](https://github.com/WebOfTrustInfo/rwot5-boston/blob/master/topics-and-advance-readings/did-primer.md)
 - [DID Spec](https://w3c.github.io/did-core/)
-- <https://github.com/hashgraph/did-sdk-js> 
+- <https://github.com/hashgraph/did-sdk-js>
 - [Hedera docs](https://docs.hedera.com)
 - [Hedera website](https://www.hedera.com)
