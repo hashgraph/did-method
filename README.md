@@ -12,6 +12,18 @@ Older versions can be viewed from tagged versions of this repo;
 * [v0.1](https://github.com/Meeco/hedera-did-method/releases/tag/v0.1) 
 * [v0.9](https://github.com/Meeco/hedera-did-method/releases/tag/v0.9)
 
+Note the specification markdown file uses [pandoc `title block` syntax](https://pandoc.org/MANUAL.html#extension-pandoc_title_block) for the title and meta data so the table of content did not include these headers.
+
+To create a PDF of the document run
+```
+pandoc hedera-did-method-specification.md -o hedera-did-method-specification.pdf
+```
+
+Dependencies are:
+``` 
+sudo apt install pandoc librsvg2-bin texlive-latex-extra
+```
+
 ## SDKs supporting the Hedera Hashgraph DID Method & Verifiable Credentials
 
 - JavaScript SDK is maintained in a separate repository at [did-sdk-js](https://github.com/hashgraph/did-sdk-js).
