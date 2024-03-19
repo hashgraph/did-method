@@ -1,10 +1,7 @@
-% title: Hedera Hashgraph DID Method Specification
-
-% authors: Paul Madsen, Jo Vercammen, Derek Munneke
-
-% date: 2024-01-12
-
-% version: 1.0-draft-2024-01-12
+% Hedera Hashgraph DID Method Specification
+% Authors: Paul Madsen, Jo Vercammen, Derek Munneke
+% Version: 1.0-draft-2024-01-12
+<!-- [pandoc `title block`](https://pandoc.org/MANUAL.html#extension-pandoc_title_block) -->
 
 **Table of Contents** 
 
