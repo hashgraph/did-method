@@ -1,0 +1,81 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "type": "object",
+    "title": "Hedera DID Message Schema",
+    "description": "The schema describing Hedera HCS DID message.",
+    "required": [
+        "message",
+        "signature"
+    ],
+    "properties": {
+        "message": {
+            "$id": "#/properties/message",
+            "type": "object",
+            "title": "The DID message",
+            "description": "The DID message content",
+            "default": {},
+            "additionalProperties": false,
+            "required": [
+                "operation",
+                "did",
+                "event",
+                "timestamp"
+            ],
+            "properties": {
+                "operation": {
+                    "$id": "#/properties/message/properties/operation",
+                    "type": "string",
+                    "title": "The DID operation name",
+                    "description": "An operation name to be performed on the DID.",
+                    "default": "",
+                    "examples": [
+                      "create",
+                      "update",
+                      "delete",
+                      "revoke"
+                    ]
+                },
+                "did": {
+                    "$id": "#/properties/message/properties/did",
+                    "type": "string",
+                    "title": "The DID",
+                    "description": "The Decentralized Identifier",
+                    "default": "",
+                    "examples": [
+                      "did:hedera:mainnet:7Prd74ry1Uct87nZqL3ny7aR7Cg46JamVbJgk8azVgUm__0.0.12345"
+                    ]
+                },
+                "event": {
+                    "$id": "#/properties/message/properties/event",
+                    "type": "string",
+                    "title": "The DID Event",
+                    "description": "The Base64-encoded list of events in JSON notation",
+                    "default": "",
+                    "examples": [
+                      "ewogICJAY29udGV...9tL3ZjLyIKICAgIH0KICBdCn0="
+                    ]
+                },
+                "timestamp": {
+                    "$id": "#/properties/message/properties/timestamp",
+                    "type": "string",
+                    "title": "The message generation timestamp",
+                    "description": "The timestamp when the message was generated on the appnet",
+                    "default": "",
+                    "examples": [
+                        "2020-04-23T14:37:43.511Z"
+                    ]
+                }
+            }
+        },
+        "signature": {
+            "$id": "#/properties/signature",
+            "type": "string",
+            "title": "Message signature",
+            "description": "The base64-encoded signature of the message attribute",
+            "default": "",
+            "examples": [
+              "QNB13Y7Q9...1tzjn4w=="
+            ]
+        }
+    }
+  }
