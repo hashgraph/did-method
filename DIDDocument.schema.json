@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "type": "object",
+  "title": "DIDDocument HCS Event Schema",
+  "description": "The schema describing event payload for a DIDDocument object inside a Hedera DID HCS message.",
+  "required": ["DIDDocument"],
+  "properties": {
+    "DIDDocument": {
+      "$id": "#/properties/message",
+      "type": "object",
+      "title": "The DID Document reference",
+      "required": ["id", "cid"],
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "type": "string" },
+        "cid": { "type": "string" },
+        "url": { "type": "string" }
+      }
+    }
+  }
+}
