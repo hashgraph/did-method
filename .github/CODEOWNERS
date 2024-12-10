@@ -10,19 +10,19 @@
 # NOTE: Must be placed last to ensure enforcement over all other rules
 
 # Protection Rules for Github Configuration Files and Actions Workflows
-/.github/                                               @hashgraph/devops-ci @hashgraph/release-engineering-managers
-/.github/workflows/                                     @hashgraph/devops-ci @hashgraph/devops-ci-committers
+/.github/                                               @hashgraph/devops-ci @hashgraph/release-engineering-managers @hashgraph/product-management
+/.github/workflows/                                     @hashgraph/devops-ci @hashgraph/devops-ci-committers @hashgraph/product-management
 
 # Self-protection for root CODEOWNERS files (this file should not exist and should definitely require approval)
-/CODEOWNERS                                             @hashgraph/release-engineering-managers
+/CODEOWNERS                                             @hashgraph/release-engineering-managers @hashgraph/product-management
 
 # Protect the repository root files
-/README.md                                              @hashgraph/devops-ci @hashgraph/release-engineering-managers
-**/LICENSE                                              @hashgraph/release-engineering-managers
+/README.md                                              @hashgraph/devops-ci @hashgraph/release-engineering-managers @hashgraph/product-management
+**/LICENSE                                              @hashgraph/release-engineering-managers @hashgraph/product-management
 
 # CodeCov configuration
-**/codecov.yml                                          @hashgraph/devops-ci @hashgraph/release-engineering-managers
+**/codecov.yml                                          @hashgraph/devops-ci @hashgraph/release-engineering-managers @hashgraph/product-management
 
 # Git Ignore definitions
-**/.gitignore                                           @hashgraph/devops-ci @hashgraph/release-engineering-managers
-**/.gitignore.*                                         @hashgraph/devops-ci @hashgraph/release-engineering-managers
+**/.gitignore                                           @hashgraph/devops-ci @hashgraph/release-engineering-managers @hashgraph/product-management
+**/.gitignore.*                                         @hashgraph/devops-ci @hashgraph/release-engineering-managers @hashgraph/product-management
